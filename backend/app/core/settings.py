@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     SENTRY_DSN: str | None = None
     LOG_LEVEL: str = "info"
 
+    # WebSocket configuration
+    WS_MAX_CONNECTIONS_PER_USER: int = 5
+    WS_HEARTBEAT_INTERVAL: int = 30  # seconds
+    WS_MESSAGE_MAX_SIZE: int = 1024 * 1024  # 1MB
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
 
 @lru_cache

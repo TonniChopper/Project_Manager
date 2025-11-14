@@ -24,7 +24,7 @@ class ConnectionManager:
         self.active_connections: Dict[int, Set[WebSocket]] = {}  # user_id -> set of websockets
         self.connection_user_map: Dict[WebSocket, int] = {}  # websocket -> user_id
         self.room_connections: Dict[str, Set[WebSocket]] = {}  # room_id -> set of websockets
-        self.max_connections_per_user: int = 5
+        self.max_connections_per_user: int = settings.WS_MAX_CONNECTIONS_PER_USER
         self.redis: Optional[aioredis.Redis] = None
         self.pubsub: Optional[aioredis.client.PubSub] = None
         self.redis_listener_task: Optional[asyncio.Task] = None
