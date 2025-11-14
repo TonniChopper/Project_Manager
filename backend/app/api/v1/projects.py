@@ -1,12 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List
 
 from ...core.dependencies import get_db
 from ...core.security import get_current_user
 from ...schemas.project import ProjectCreate, ProjectUpdate, ProjectPublic, ProjectDetail
-from ...db.models import Project, User
-
+from ...db.models import Project
+from ...services.webhooks import send_webhook_sync, WebhookEventType
 router = APIRouter()
 
 
@@ -69,7 +69,12 @@ def update_project(project_id: int, payload: ProjectUpdate, db: Session = Depend
 
 
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete (archive) project")
-def delete_project(project_id: int, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+def delete_project(
+    project_id: int,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+):
     project = db.get(Project, project_id)
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
@@ -79,6 +84,17 @@ def delete_project(project_id: int, db: Session = Depends(get_db), current_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found in DB")
     if project.owner_id != user["id"] and current_user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to delete this project")
+
+    # Send webhook before archiving
+    background_tasks.add_task(
+        _send_project_webhook,
+        db=db,
+        event_type=WebhookEventType.PROJECT_DELETED,
+        project=project,
+        user_id=user["id"],
+        user_data={"username": user["username"], "email": user.get("email")}
+    )
+
     # Soft-archive
     project.is_archived = True
     db.add(project)

@@ -1,0 +1,231 @@
+{
+  "name": "Project Manager - Task Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "project-manager",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "project-manager-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.event.type}}",
+              "operation": "equals",
+              "value2": "task.created"
+            }
+          ]
+        }
+      },
+      "id": "filter-task-created",
+      "name": "Filter: Task Created",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.event.type}}",
+              "operation": "equals",
+              "value2": "task.assigned"
+            }
+          ]
+        }
+      },
+      "id": "filter-task-assigned",
+      "name": "Filter: Task Assigned",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.event.type}}",
+              "operation": "equals",
+              "value2": "task.completed"
+            }
+          ]
+        }
+      },
+      "id": "filter-task-completed",
+      "name": "Filter: Task Completed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 700]
+    },
+    {
+      "parameters": {
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "url": "https://slack.com/api/chat.postMessage",
+        "options": {},
+        "bodyParametersJson": "={\n  \"channel\": \"#project-updates\",\n  \"text\": \"🆕 New Task Created\",\n  \"blocks\": [\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*New Task Created*\\n\\n*Title:* {{$json.entity.data.title}}\\n*Project:* {{$json.metadata.project_name}}\\n*Priority:* {{$json.entity.data.priority}}\\n*Created by:* {{$json.user.data.username}}\"\n      }\n    },\n    {\n      \"type\": \"context\",\n      \"elements\": [\n        {\n          \"type\": \"mrkdwn\",\n          \"text\": \"Task ID: {{$json.entity.id}} | {{$json.event.timestamp}}\"\n        }\n      ]\n    }\n  ]\n}"
+      },
+      "id": "slack-notify-created",
+      "name": "Slack: Task Created",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 200]
+    },
+    {
+      "parameters": {
+        "fromEmail": "notifications@projectmanager.com",
+        "toEmail": "={{$json.user.data.email}}",
+        "subject": "=Task Assigned: {{$json.entity.data.title}}",
+        "text": "=Hi,\n\nYou have been assigned a new task:\n\nTitle: {{$json.entity.data.title}}\nProject: {{$json.metadata.project_name}}\nPriority: {{$json.entity.data.priority}}\nDue Date: {{$json.entity.data.due_date}}\n\nPlease check the project manager for more details.\n\nBest regards,\nProject Manager Team",
+        "options": {}
+      },
+      "id": "email-task-assigned",
+      "name": "Email: Task Assigned",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "resource": "issue",
+        "project": "PROJECT_KEY",
+        "issueType": "Task",
+        "summary": "={{$json.entity.data.title}}",
+        "description": "=Task completed in Project Manager:\n\n{{$json.entity.data.description}}\n\nCompleted by: {{$json.user.data.username}}\nCompleted at: {{$json.event.timestamp}}",
+        "additionalFields": {
+          "priority": "={{$json.entity.data.priority}}"
+        }
+      },
+      "id": "jira-create-issue",
+      "name": "Jira: Create Archive Issue",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [650, 700]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"status\":\"success\",\"message\":\"Webhook processed\",\"event_id\":\"{{$json.event.timestamp}}\"}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter: Task Created",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter: Task Assigned",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter: Task Completed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Task Created": {
+      "main": [
+        [
+          {
+            "node": "Slack: Task Created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Task Assigned": {
+      "main": [
+        [
+          {
+            "node": "Email: Task Assigned",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter: Task Completed": {
+      "main": [
+        [
+          {
+            "node": "Jira: Create Archive Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack: Task Created": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email: Task Assigned": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Jira: Create Archive Issue": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-11-14T00:00:00.000Z",
+  "versionId": "1"
+}
+

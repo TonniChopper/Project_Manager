@@ -163,3 +163,33 @@ class Message(Base, TimestampMixin):
     def __repr__(self) -> str:
         return f"<Message(id={self.id}, channel_id={self.channel_id}, author_id={self.author_id})>"
 
+
+class WebhookEvent(Base, TimestampMixin):
+    """Audit log for outgoing webhook calls to n8n and other services."""
+    __tablename__ = "webhook_events"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)  # e.g., "project.created"
+    entity_type: Mapped[str] = mapped_column(String(50), nullable=False)  # "project", "task", etc.
+    entity_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    user_id: Mapped[Optional[int]] = mapped_column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    webhook_url: Mapped[str] = mapped_column(String(512), nullable=False)
+    payload: Mapped[str] = mapped_column(Text, nullable=False)  # JSON string
+    status_code: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)  # HTTP status
+    response_body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    retry_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    success: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+
+    # Relationships
+    user: Mapped[Optional["User"]] = relationship("User")
+
+    __table_args__ = (
+        Index("ix_webhook_events_type_created", "event_type", "created_at"),
+        Index("ix_webhook_events_success", "success", "created_at"),
+    )
+
+    def __repr__(self) -> str:
+        return f"<WebhookEvent(id={self.id}, type={self.event_type}, success={self.success})>"
+
+
