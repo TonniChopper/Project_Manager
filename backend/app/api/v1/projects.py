@@ -7,7 +7,36 @@ from ...core.security import get_current_user
 from ...schemas.project import ProjectCreate, ProjectUpdate, ProjectPublic, ProjectDetail
 from ...db.models import Project
 from ...services.webhooks import send_webhook_sync, WebhookEventType
+
 router = APIRouter()
+
+
+def _send_project_webhook(db_url: str, event_type: str, project: Project, user_id: int, user_data: dict):
+    """Background-safe webhook sender: open fresh session inside thread."""
+    from ...db.session import SessionLocal
+    db = SessionLocal()
+    try:
+        send_webhook_sync(
+            db=db,
+            event_type=event_type,
+            entity_type="project",
+            entity_id=project.id,
+            entity_data={
+                "id": project.id,
+                "name": project.name,
+                "description": project.description,
+                "status": project.status,
+                "owner_id": project.owner_id,
+                "is_archived": project.is_archived,
+                "start_date": project.start_date.isoformat() if project.start_date else None,
+                "end_date": project.end_date.isoformat() if project.end_date else None,
+            },
+            user_id=user_id,
+            user_data=user_data,
+            metadata={}
+        )
+    finally:
+        db.close()
 
 
 @router.post("/", response_model=ProjectPublic, status_code=status.HTTP_201_CREATED, summary="Create a project")
@@ -85,10 +114,10 @@ def delete_project(
     if project.owner_id != user["id"] and current_user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to delete this project")
 
-    # Send webhook before archiving
+    # Send webhook before archiving (open new session inside background task)
     background_tasks.add_task(
         _send_project_webhook,
-        db=db,
+        db_url="unused",
         event_type=WebhookEventType.PROJECT_DELETED,
         project=project,
         user_id=user["id"],
@@ -100,4 +129,3 @@ def delete_project(
     db.add(project)
     db.commit()
     return None
-

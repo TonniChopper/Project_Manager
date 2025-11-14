@@ -6,21 +6,18 @@ from ...core.dependencies import get_db
 from ...core.security import get_current_user
 from ...schemas.task import TaskCreate, TaskUpdate, TaskPublic, TaskDetail
 from ...db.models import Task, Project
+from ...db.session import SessionLocal
 from ...services.webhooks import send_webhook_sync, WebhookEventType
 
 router = APIRouter()
 
 
-def _send_task_webhook(
-    db: Session,
-    event_type: str,
-    task: Task,
-    user_id: int,
-    user_data: dict,
-    metadata: dict = None
-):
-    """Helper to send task webhook event."""
+def _send_task_webhook_bg(event_type: str, task_id: int, metadata: dict, user_id: int, user_data: dict):
+    db = SessionLocal()
     try:
+        task = db.get(Task, task_id)
+        if not task:
+            return
         send_webhook_sync(
             db=db,
             event_type=event_type,
@@ -42,9 +39,8 @@ def _send_task_webhook(
             user_data=user_data,
             metadata=metadata or {}
         )
-    except Exception as e:
-        from ...core.logging import logger
-        logger.error(f"Failed to send webhook for {event_type}: {e}")
+    finally:
+        db.close()
 
 
 @router.post("/", response_model=TaskPublic, status_code=status.HTTP_201_CREATED, summary="Create a task")
@@ -79,13 +75,12 @@ def create_task(
 
     # Send webhook notification
     background_tasks.add_task(
-        _send_task_webhook,
-        db=db,
+        _send_task_webhook_bg,
         event_type=WebhookEventType.TASK_CREATED,
-        task=task,
+        task_id=task.id,
+        metadata={"project_name": project.name},
         user_id=user_row["id"],
         user_data={"username": user_row["username"], "email": user_row.get("email")},
-        metadata={"project_name": project.name}
     )
 
     return task
@@ -157,13 +152,12 @@ def update_task(
 
     # Send webhook
     background_tasks.add_task(
-        _send_task_webhook,
-        db=db,
+        _send_task_webhook_bg,
         event_type=event_type,
-        task=task,
+        task_id=task.id,
+        metadata=metadata,
         user_id=user_row["id"],
         user_data={"username": user_row["username"], "email": user_row.get("email")},
-        metadata=metadata
     )
 
     return task
@@ -189,16 +183,14 @@ def delete_task(
 
     # Send webhook before deletion
     background_tasks.add_task(
-        _send_task_webhook,
-        db=db,
+        _send_task_webhook_bg,
         event_type=WebhookEventType.TASK_DELETED,
-        task=task,
+        task_id=task.id,
+        metadata={"project_name": project.name},
         user_id=user_row["id"],
         user_data={"username": user_row["username"], "email": user_row.get("email")},
-        metadata={"project_name": project.name}
     )
 
     db.delete(task)
     db.commit()
     return None
-

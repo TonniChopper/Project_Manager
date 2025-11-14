@@ -1,192 +1,144 @@
 # Project Manager Platform
 
-Modern FastAPI-based backend scaffold for a real-time AI-powered project management platform.
+Modern FastAPI backend with real-time features, PostgreSQL, Redis, and n8n automation.
 
 ## Features
-- 🔐 **JWT Authentication** with access/refresh tokens
-- 💬 **Real-time WebSocket** with Redis pub/sub for horizontal scaling
-- 🗄️ **PostgreSQL + SQLAlchemy** with Alembic migrations
-- 📊 **Comprehensive Models**: User, Project, Task, Channel, Message
-- 🧪 **Test Coverage**: Auth, WebSocket, Models, Migrations
-- 📚 **Complete API Documentation**
-- 🚀 **Production Ready**: Docker, logging, error handling
+- 🔐 JWT Authentication (access + refresh tokens)
+- 💬 Real-time WebSocket (Redis pub/sub scaling)
+- 🗄️ PostgreSQL + SQLAlchemy + Alembic migrations
+- 📊 REST API (Projects, Tasks, Channels, Messages, Users)
+- 🔔 Webhook integration (n8n automation)
+- 🧪 Comprehensive test coverage
+- 🐳 Docker development environment
 
-## Structure
-```
-backend/
-  app/
-    api/          # REST & WebSocket routers (auth, health, ws)
-    core/         # Settings, security, logging, dependencies
-    db/           # SQLAlchemy models, session, migrations (Alembic)
-    schemas/      # Pydantic models (request/response)
-    services/     # Business logic layer (auth, websocket, events)
-    main.py       # FastAPI application entrypoint
-  tests/          # Pytest tests (models, auth, websocket, migrations)
-frontend/         # Frontend client (placeholder)
-infra/            # Infrastructure as code (placeholder)
-workflows/        # Workflow / n8n automations (placeholder)
-WEBSOCKET_API.md  # WebSocket API documentation
-ws_test_client.py # WebSocket test client
-```
+## Quick Start
 
-## Database Models
-- **User**: username, email, hashed_password, role, full_name, avatar_url
-- **Project**: name, description, owner, status, start/end dates
-- **Task**: title, description, project, assignee, creator, status, priority, due_date
-- **Channel**: name, description, project, is_private (for real-time chat)
-- **Message**: content, channel, author, parent (threading support)
-
-All models include `created_at` and `updated_at` timestamps.
-
-## Quick start
-1. Create `.env` from `.env.example`.
-2. Install deps:
+### Docker (Recommended)
 ```powershell
-python -m venv venv
-venv\Scripts\activate
+# Windows
+./scripts/manage.ps1 setup
+./scripts/manage.ps1 up
+
+# Linux/Mac
+make setup && make up
+```
+
+### Local Development
+```powershell
+python -m venv PMvenv
+.\PMvenv\Scripts\Activate.ps1
 pip install -r requirements.txt
-```
-3. Initialize database:
-```powershell
-# Option 1: Run migrations (recommended)
 alembic upgrade head
-
-# Option 2: Direct init (for development)
-python -m backend.app.db.init_db
-```
-4. Run dev server:
-```powershell
-uvicorn backend.app.main:app --reload --port 8000
+uvicorn backend.app.main:app --reload
 ```
 
-## WebSocket Real-time API
-**Endpoint**: `ws://localhost:8000/api/v1/ws/connect?token=JWT_TOKEN`
+**Access:**
+- API Docs: http://localhost:8000/docs
+- Health: http://localhost:8000/api/v1/health/
+- n8n: http://localhost:5678
 
-**Features**:
-- Room-based messaging (projects, channels, tasks)
-- Event broadcasting (task updates, messages, notifications)
-- Redis pub/sub for multi-instance support
-- Per-user connection limits
-- JWT authentication
+## Documentation
 
-**Quick Test**:
-```powershell
-python ws_test_client.py alice Secret123 interactive
-```
+Comprehensive docs in `docs/`:
 
-See [WEBSOCKET_API.md](WEBSOCKET_API.md) for complete documentation.
+- **[Getting Started](docs/getting-started.md)** - Setup & environment configuration
+- **[Backend API](docs/backend-api.md)** - REST endpoints overview
+- **[WebSockets](docs/websockets.md)** - Real-time API & implementation
+- **[Webhooks & n8n](docs/workflows.md)** - Automation integration
+- **[Database](docs/implementation.md)** - Models, schemas, repositories
+- **[Migrations](docs/migrations.md)** - Alembic workflow
+- **[Docker & Infra](docs/docker.md)** - Local dev environment
+- **[Testing](docs/testing.md)** - Test suites & coverage
+- **[Project Structure](docs/structure.md)** - Folder organization
 
-## Database Migrations
-```powershell
-# Create new migration after model changes
-alembic revision --autogenerate -m "Description"
-
-# Apply migrations
-alembic upgrade head
-
-# Rollback one migration
-alembic downgrade -1
-
-# View migration history
-alembic history
-```
-
-## Testing
-```powershell
-# All tests
-pytest -q
-
-# Specific test suite
-pytest backend/tests/test_models.py -v
-pytest backend/tests/test_auth.py -v
-pytest backend/tests/test_ws.py -v
-```
-
-## Docker
-```powershell
-docker build -t project-manager-backend -f backend/Dockerfile .
-docker run -p 8000:8000 --env-file .env project-manager-backend
-```
+## Key Technologies
+- **Backend:** FastAPI, SQLAlchemy, Alembic, Pydantic
+- **Database:** PostgreSQL
+- **Cache:** Redis
+- **Real-time:** WebSockets, Redis pub/sub
+- **Automation:** n8n
+- **Testing:** Pytest
+- **Deployment:** Docker, Docker Compose
 
 ## API Endpoints
 
 ### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login and get JWT tokens
-- `POST /api/v1/auth/refresh` - Refresh access token
-- `GET /api/v1/auth/me` - Get current user (protected)
+- `POST /api/v1/auth/register` - Register user
+- `POST /api/v1/auth/login` - Login (JWT tokens)
+- `POST /api/v1/auth/refresh` - Refresh token
+- `GET /api/v1/auth/me` - Current user
 
-### Health
-- `GET /api/v1/health/` - Health check
+### Resources (CRUD)
+- `/api/v1/projects/` - Projects
+- `/api/v1/tasks/` - Tasks
+- `/api/v1/channels/` - Channels
+- `/api/v1/messages/` - Messages
+- `/api/v1/users/` - Users
 
-### WebSocket
-- `WS /api/v1/ws/connect?token=JWT` - Real-time communication
+### Real-time
+- `WS /api/v1/ws/connect?token=JWT` - WebSocket
 
-## Configuration
+## Database Models
+- **User** - username, email, role, full_name
+- **Project** - name, owner, status, dates
+- **Task** - title, project, assignee, status, priority
+- **Channel** - name, project, is_private
+- **Message** - content, channel, author, threading
 
-Key environment variables in `.env`:
+All models include `created_at` and `updated_at` timestamps.
+
+## Development Commands
+
+```powershell
+# Database
+alembic revision --autogenerate -m "description"
+alembic upgrade head
+alembic downgrade -1
+
+# Testing
+pytest -q
+pytest backend/tests/test_auth.py -v
+pytest --cov=backend/app
+
+# Docker
+./scripts/manage.ps1 up        # Start services
+./scripts/manage.ps1 logs      # View logs
+./scripts/manage.ps1 down      # Stop services
+```
+
+## Environment Variables
+
+Key variables in `.env`:
 ```env
 DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/project_manager
 REDIS_URL=redis://localhost:6379/0
-JWT_SECRET=your_secret_key
-WS_MAX_CONNECTIONS_PER_USER=5
+JWT_SECRET=<64-random-chars>
+N8N_URL=http://localhost:5678
 ```
 
-See `.env.example` for all options.
-
-## Documentation
-- [WEBSOCKET_API.md](WEBSOCKET_API.md) - WebSocket API documentation
-- [WEBSOCKET_IMPLEMENTATION.md](WEBSOCKET_IMPLEMENTATION.md) - Implementation details
-- [IMPLEMENTATION_SUMMARY_DB.md](IMPLEMENTATION_SUMMARY_DB.md) - Database layer details
-- [backend/app/db/README.md](backend/app/db/README.md) - Database usage guide
+See [Getting Started](docs/getting-started.md) for full configuration.
 
 ## Architecture
 
-### Layered Design
 ```
-API Layer (FastAPI routers)
-    ↓
-Service Layer (Business logic)
-    ↓
-Repository Layer (DB queries)
-    ↓
-Model Layer (SQLAlchemy ORM)
+Client → FastAPI → Service Layer → Repository → PostgreSQL
+              ↓
+         WebSocket → Redis Pub/Sub → Broadcast
+              ↓
+         Webhooks → n8n → External Services
 ```
 
-### Real-time Events
-```
-Service Layer
-    ↓
-WebSocket Events (ws_events.py)
-    ↓
-ConnectionManager (ws_service.py)
-    ↓
-Redis Pub/Sub → All Instances → Clients
-```
+## License
+MIT
 
-[//]: # (## Next Steps)
+## Contributing
+1. Fork the repository
+2. Create feature branch
+3. Run tests: `pytest`
+4. Submit pull request
 
-[//]: # (- ✅ JWT Authentication)
+---
 
-[//]: # (- ✅ WebSocket real-time layer)
-
-[//]: # (- ✅ Database models & migrations)
-
-[//]: # (- ✅ Comprehensive testing)
-
-[//]: # (- 🔄 REST API for CRUD operations &#40;Projects, Tasks, Channels&#41;)
-
-[//]: # (- 🔄 Room access control & permissions)
-
-[//]: # (- 🔄 File uploads & storage)
-
-[//]: # (- 🔄 Email notifications)
-
-[//]: # (- 🔄 AI microservice integration)
-
-[//]: # (- 🔄 Full-text search)
-
-[//]: # (- 🔄 Background jobs &#40;Celery&#41;)
-
-
+**Version:** 1.0  
+**Last Updated:** 2025-11-14
 
