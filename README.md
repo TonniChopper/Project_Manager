@@ -128,9 +128,6 @@ Client → FastAPI → Service Layer → Repository → PostgreSQL
          Webhooks → n8n → External Services
 ```
 
-## License
-MIT
-
 ## Contributing
 1. Fork the repository
 2. Create feature branch

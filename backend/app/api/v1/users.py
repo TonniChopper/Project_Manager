@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from ...core.dependencies import get_db
-from ...core.security import get_current_user
+from ...core.security import get_current_user, get_password_hash
 from ...schemas.user import UserCreate, UserPublic
 from ...db.repositories import UserRepository
 
@@ -48,11 +48,11 @@ def update_user(user_id: int, payload: UserCreate, db: Session = Depends(get_db)
     username = current_user.get("username")
     if current_user.get("role") != "admin" and username != user.username:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to update this user")
-    # update fields: username not allowed
-    if payload.email:
+    # username updates are not allowed
+    if payload.email is not None:
         user.email = payload.email
     if payload.password:
-        user.hashed_password = payload.password  # password hashing is handled in repo.create; for simplicity accept raw here
+        user.hashed_password = get_password_hash(payload.password)
     repo.update(user)
     return user
 
@@ -68,4 +68,3 @@ def delete_user(user_id: int, db: Session = Depends(get_db), current_user: dict 
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to delete this user")
     repo.delete(user)
     return None
-
