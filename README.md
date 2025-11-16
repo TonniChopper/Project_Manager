@@ -1,18 +1,23 @@
 # Project Manager — FastAPI + React
 
-AI‑powered project management platform with real‑time chat, Kanban tasks, and a beautiful modern UI.
+AI‑powered project management platform with real‑time chat, Kanban tasks, project metrics, and a beautiful modern UI.
 
 ## Monorepo Layout
+- `backend/` — FastAPI API (JWT HttpOnly cookies, PostgreSQL, Redis, Alembic, WebSockets)
+- `frontend/` — React UI (styled-components, framer-motion, drag & drop, axios)
+- `infra/` — Docker Compose, Nginx reverse proxy (single entry on :80)
+- `docs/` — internal technical docs (API, websockets, infra, workflows)
 
-- `backend/` — FastAPI API (JWT auth, PostgreSQL, Redis, Alembic, WebSockets)
-- `frontend/` — React UI (styled‑components, framer‑motion, @dnd‑kit, axios)
-- `infra/` — Docker Compose, Nginx, DB bootstrap
-- `docs/` — internal documentation (API, websockets, infra, workflows)
+## Feature Highlights
+- Project metrics (progress %, velocity 7d, overdue tasks)
+- Auth with access & refresh tokens (JSON + HttpOnly cookies)
+- Scalable WebSocket layer (rooms: project/channel/task, Redis pub/sub)
+- Kanban task board & rich animated UI components
+- Workflow & webhook integration (n8n)
+- CI (GitHub Actions: lint/test/build + multi-arch Docker images)
 
 ## Quick Start (Local)
-
-Backend (requires Python 3.12+, PostgreSQL, Redis):
-
+### Backend
 ```bash
 cd backend
 ..\PMvenv\Scripts\activate
@@ -20,129 +25,89 @@ pip install -r ..\requirements.txt
 alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 ```
-
-Frontend (Node 18+):
-
+### Frontend
 ```bash
 cd frontend
 npm install
-# Configure API/WS (optional overrides): create .env.local
+# Optional .env.local overrides:
 # REACT_APP_API_URL=http://localhost:8000/api/v1
 # REACT_APP_WS_URL=ws://localhost:8000/api/v1/ws
 npm start
 ```
-
 Open:
 - UI: http://localhost:3000
-- API: http://localhost:8000
-- Docs (OpenAPI): http://localhost:8000/docs
+- API: http://localhost:8000 (Swagger /docs)
+- WS: ws://localhost:8000/api/v1/ws/connect?token=ACCESS_TOKEN
 
-## Quick Start (Docker Compose)
+## Project Metrics API
+- `GET /api/v1/projects?include=metrics` — list projects enriched with metrics
+- `GET /api/v1/projects/{id}/metrics` — single project metrics
 
-All core services (DB, Redis, Backend, n8n, Frontend):
+Metric fields:
+| Field | Meaning |
+|-------|---------|
+| `total_tasks` | Total tasks in project |
+| `completed_tasks` | Number of tasks with status `done` |
+| `progress_percent` | (completed / total)*100 rounded |
+| `overdue_tasks` | Tasks past due date & not done |
+| `velocity_7d` | Tasks completed in last 7 days |
 
-```bash
-# In project root
-make setup            # creates infra/docker/.env from example if missing
-make up-full          # start db + cache + backend + frontend
-make status           # show ports and health
+## Auth Flow (Cookies + JSON)
+Login / refresh responses still return JSON tokens for backward compatibility while also setting:
 ```
-
-or via docker-compose directly:
-
-```bash
-cd infra/docker
-cp .env.example .env   # adjust variables if needed
-docker-compose --profile full up -d --build
+Set-Cookie: access_token=...; HttpOnly; SameSite=Lax
+Set-Cookie: refresh_token=...; HttpOnly; SameSite=Lax
 ```
+In production (`APP_ENV=production`) cookies are `Secure`.
+Frontend should prefer cookie transport (remove localStorage secrets in prod). Tests continue to use Bearer headers.
 
-Services:
-- Frontend: http://localhost:${FRONTEND_PORT:-3000}
-- Backend: http://localhost:${BACKEND_PORT:-8000}
-- n8n: http://localhost:${N8N_PORT:-5678}
-- PgAdmin (tools profile): http://localhost:${PGADMIN_PORT:-5050}
-- Redis Commander (tools profile): http://localhost:${REDIS_COMMANDER_PORT:-8081}
+## WebSockets
+Endpoint: `ws://localhost:8000/api/v1/ws/connect?token=ACCESS_TOKEN`
+Rooms validate prefix: `channel:{id}` | `project:{id}` | `task:{id}`.
+Events: `message`, `user_joined`, `user_left`, `task.*`, `project.*`, `notification.*`.
+See `docs/websockets.md`.
 
-Note: Frontend in Docker is pre‑wired with `REACT_APP_API_URL=http://localhost:8000/api/v1` and `REACT_APP_WS_URL=ws://localhost:8000/api/v1/ws`.
+## Docker & Nginx
+Single entry point `localhost:80` with reverse proxy:
+- `/` → React dev server / frontend container
+- `/api/` → FastAPI backend
+- `/api/v1/ws/` → WebSocket upgrade
+- `/n8n/` → n8n automation
 
-## Backend (API)
-
-- Tech: FastAPI, SQLAlchemy, Alembic, JWT, Redis, WebSockets
-- Entry: `backend/app/main.py`, router: `backend/app/api/`
-- Settings: `backend/app/core/settings.py` (.env in project root)
-- Migrations: `alembic` (see `docs/migrations.md`)
-
-Common commands:
-```bash
-# From backend/
-uvicorn app.main:app --reload --port 8000
-alembic revision --autogenerate -m "message" && alembic upgrade head
-pytest -q
-```
-
-## Frontend (UI)
-
-- Tech: React 18, styled‑components 6, framer‑motion, @dnd‑kit, axios
-- Entry: `frontend/src/App.js`, theme: `frontend/src/theme/`
-- API client: `frontend/src/services/api.js`
-
-Common commands:
-```bash
-# From frontend/
-npm install
-npm start
-npm run build
-npm run lint
-npm run format
-```
-
-## Infra (Docker)
-
-Compose file: `infra/docker/docker-compose.yml` with services:
-- `db` (Postgres 15)
-- `cache` (Redis 7)
-- `app` (FastAPI backend, hot‑reload)
-- `frontend` (CRA dev server)
-- `n8n` (automation)
-- optional: `pgadmin`, `redis-commander`, `nginx`
-
-One‑liner to launch all core services:
-```bash
-make up-full     # or: docker-compose --profile full up -d --build -f infra/docker/docker-compose.yml
-```
-
-## Docs
-
-See `docs/` for details:
-- API: `docs/backend-api.md`
-- WebSockets: `docs/websockets.md`
-- Infra & Docker: `docs/infra.md`, `docs/docker.md`
-- Migrations: `docs/migrations.md`
-- Frontend: `docs/frontend.md`
-- Testing: `docs/testing.md`
-- Workflows (n8n): `docs/workflows.md`
-
-## Environment
-
-Root `.env.example` exists. Important keys:
-- Backend: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `CORS_ORIGINS`
-- Frontend: `REACT_APP_API_URL`, `REACT_APP_WS_URL`
-- Compose vars in `infra/docker/.env.example`
+## Environment Variables
+Root `.env.example` holds backend settings:
+- `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `CORS_ORIGINS`, `APP_ENV`
+Frontend: `.env.local` for `REACT_APP_API_URL`, `REACT_APP_WS_URL`.
+Infra: `infra/docker/.env.example` for compose port overrides.
 
 ## Makefile Shortcuts
+```bash
+make up          # start core services (db+redis+backend)
+make up-full     # start all (incl. frontend, n8n, nginx)
+make down        # stop
+make status      # container status
+make logs        # aggregated logs
+make test        # backend tests
+make lint        # ruff + eslint (if scripted)
+```
 
-Useful targets in `Makefile`:
-- `make up` / `make up-full` / `make down`
-- `make status` / `make logs` / `make restart-app`
-- `make db-migrate` / `make db-backup` / `make db-restore`
-- `make test` / `make lint` / `make format`
+## Documentation Index
+See `docs/INDEX.md` for full map:
+- API: `docs/backend-api.md`
+- Frontend Guide: `docs/frontend.md`
+- WebSockets: `docs/websockets.md`
+- Infra & Docker: `docs/infra.md` / `docs/docker.md`
+- Migrations: `docs/migrations.md`
+- Testing: `docs/testing.md`
+- Workflows (n8n): `docs/workflows.md`
+- Structure: `docs/structure.md`
 
-## Housekeeping
-
-- Kept only core folders at root: `backend/`, `frontend/`, `infra/`, `docs/`
-- Cleaned demo placeholders in frontend (pages/components) and wired real API/WebSocket
-- Compose adjusted to `./backend` and `./frontend` contexts, with correct API/WS URLs
+## Production Notes
+- Serve frontend build behind Nginx (ensure proper cache headers)
+- Enforce HTTPS → Secure cookies & `SameSite=Lax` or `None` as needed
+- Rotate `JWT_SECRET`, set strong values
+- Scale WebSocket horizontally with Redis enabled
+- Schedule periodic metrics recomputation if moving to pre-aggregated model
 
 ---
-
-© 2025 Project Manager. Built with FastAPI + React.
+© 2025 Project Manager. FastAPI + React.

@@ -6,11 +6,11 @@ This document consolidates the REST API and database implementation overviews.
 
 ## REST API (v1)
 - Base: `/api/v1`
-- Routers: projects, tasks, channels, messages, users
-- Auth: Bearer JWT
+- Routers: projects, tasks, channels, messages, users, webhooks
+- Auth: Bearer JWT header and HttpOnly cookies (login/refresh set cookies; JSON tokens also returned)
 
-Endpoints by resource (highlights):
-- Projects: POST `/projects/`, GET `/projects/`, GET `/projects/{id}`, PUT, DELETE
+Highlights by resource:
+- Projects: POST `/projects/`, GET `/projects/`, GET `/projects/{id}`, GET `/projects/{id}/metrics`, GET `/projects?include=metrics`, PUT, DELETE
 - Tasks: POST `/tasks/`, GET `/tasks/?project_id=...`, GET `/tasks/{id}`, PUT, DELETE
 - Channels: POST `/channels/`, GET `/channels/{id}`, GET `/channels/project/{pid}`, PUT, DELETE
 - Messages: POST `/messages/`, GET `/messages/channel/{cid}`, GET `/messages/{id}`, PUT, DELETE
@@ -23,7 +23,7 @@ Permissions:
 - Users: self/admin for update/delete; listing is admin-only
 
 OpenAPI:
-- `summary`, `response_model`, `status_code`, `tags` for all
+- `summary`, `response_model`, `status_code`, `tags`
 - Swagger at `/docs`
 
 ---
@@ -42,7 +42,7 @@ Session & Engine:
 
 Migrations:
 - Alembic initialized; autogenerate supported
-- `webhook_events` table added for audit logging
+- `webhook_events` table for audit logging
 
 Schemas (Pydantic):
 - Request: `*Create`, `*Update`
@@ -59,16 +59,19 @@ Repositories:
 - SQLite used in tests (fast), Alembic path for Postgres
 
 ## Known Technical Items
-- Some raw SQL for user lookups; can be migrated to repository usage
+- Some raw SQL replaced by ORM in new code paths
 - Pagination/limits defaulted; can be refined
-- Channels permissions simplified to admin for updates/deletes
+- Channels permissions simplified; expand later
 
 ---
 
 ## Commands
 ```powershell
-# Run server
-ython -m uvicorn backend.app.main:app --reload --port 8000
+# Run server from project root
+uvicorn backend.app.main:app --reload --port 8000
+
+# Or from backend/
+uvicorn app.main:app --reload --port 8000
 
 # Migrations
 alembic revision --autogenerate -m "change"
@@ -79,5 +82,4 @@ alembic downgrade -1
 pytest -q
 ```
 
-Last Updated: 2025-11-14
-
+Last Updated: 2025-11-16

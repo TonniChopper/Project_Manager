@@ -6,7 +6,14 @@ This page consolidates the API contract and the implementation details for the r
 
 ## Overview
 Endpoint: `ws://localhost:8000/api/v1/ws/connect?token=YOUR_JWT`
-Authentication: JWT access token (query parameter)
+Authentication: JWT access token (query parameter). In production, token can be derived from HttpOnly cookie on the client side and appended manually.
+
+## Room Format Validation
+Allowed prefixes: `channel`, `project`, `task`. Room identifier must match `<prefix>:<numeric_id>`.
+Invalid formats trigger an `error` event or close code 4403 on join attempt.
+
+## Added Access Control Stub
+Server currently performs prefix validation only (placeholder for future permission checks per project/channel/task membership).
 
 Features:
 - Rooms (project, channel, task)
@@ -43,7 +50,7 @@ Welcome message example:
 
 Envelope:
 ```json
-{"type": "join_room|leave_room|send_message|ping", "room": "project:123|channel:456|task:789", "data": {...}}
+{"type": "join_room", "room": "project:123", "data": {"extra":"value"}}
 ```
 
 Examples:
@@ -64,7 +71,7 @@ Event types:
 
 Event envelope:
 ```json
-{"type":"event_type","room":"room_identifier","data":{...},"sender":"username","timestamp":"2025-11-13T12:00:00Z"}
+{"type":"event_type","room":"room_identifier","data":{"key":"value"},"sender":"username","timestamp":"2025-11-13T12:00:00Z"}
 ```
 
 ---

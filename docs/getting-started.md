@@ -25,6 +25,12 @@ make up
 - n8n: http://localhost:5678
 - Frontend (optional): http://localhost:3000
 
+**Single entry via Nginx (optional):**
+```powershell
+docker-compose --profile full --profile nginx up -d
+# Then open http://localhost/ (frontend) and http://localhost/api/v1 (backend)
+```
+
 ## Environment Setup
 
 ### Required Variables
@@ -85,4 +91,3 @@ uvicorn backend.app.main:app --reload --port 8000
 - Run tests: `make test`
 - Import n8n workflows: see [workflows.md](./workflows.md)
 - Explore API: http://localhost:8000/docs
-

@@ -8,9 +8,9 @@ High-level overview of the project organization.
 ```
 Project_Manager/
 ├── backend/          # FastAPI application
-├── frontend/         # React app (planned)
+├── frontend/         # React application (present)
 ├── workflows/        # n8n automations
-├── infra/            # Docker, K8s, Terraform
+├── infra/            # Docker, Nginx, etc.
 ├── docs/             # Documentation
 ├── scripts/          # Helper scripts
 └── PMvenv/           # Python virtual environment
@@ -30,26 +30,25 @@ backend/
 └── alembic/          # Database migrations
 ```
 
-## Key Directories
+## Frontend (`frontend/`)
+- React 18 app with styled-components theme, framer-motion, axios services, DnD Kanban
+- Single primary README retained; other docs consolidated to `docs/`
 
-### `workflows/`
+## Workflows (`workflows/`)
 - n8n workflow exports (JSON)
-- Automation scripts
-- Test payloads for webhooks
 
-### `infra/`
-- `docker/` - Compose files, Dockerfiles
-- `kubernetes/` - K8s manifests (planned)
-- `terraform/` - IaC provisioning (planned)
+## Infra (`infra/`)
+- `docker/` - Compose files, Nginx config
 
-### `docs/`
-All project documentation organized by topic.
+## Docs (`docs/`)
+- All project documentation organized by topic.
 
 ## Configuration Files
-- `.env` - Environment variables
+- `.env` - Backend environment variables (root)
+- `infra/docker/.env` - Compose overrides
 - `requirements.txt` - Python dependencies
 - `alembic.ini` - Migration config
 - `ruff.toml` - Linter config
-- `Makefile` - Command shortcuts (Linux/Mac)
-- `scripts/manage.ps1` - Command shortcuts (Windows)
+- `Makefile` / `scripts/manage.ps1` - Command shortcuts
 
+Last Updated: 2025-11-16

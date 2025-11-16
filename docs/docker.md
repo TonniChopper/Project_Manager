@@ -25,8 +25,11 @@ copy infra\docker\.env.example infra\docker\.env
 - default: app + db + redis + n8n
 - full: + frontend
 - tools: + pgadmin + redis-commander
+- nginx: + nginx reverse proxy (single entry :80)
 
-See full details in `infra/README.md`.
+Start full stack with nginx:
+```powershell
+docker-compose --profile full --profile nginx up -d
+```
 
-Last Updated: 2025-11-14
-
+Last Updated: 2025-11-16

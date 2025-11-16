@@ -3,7 +3,7 @@
 # Backend REST API
 
 Base URL: `/api/v1`  
-Auth: Bearer JWT token in `Authorization` header  
+Auth: Bearer JWT header OR HttpOnly cookies (`access_token`, `refresh_token`)  
 Format: `application/json`
 
 ## Authentication (`/auth`)
@@ -11,82 +11,50 @@ Format: `application/json`
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/auth/register` | POST | Register new user |
-| `/auth/login` | POST | Login, returns access + refresh tokens |
-| `/auth/refresh` | POST | Refresh access token |
-| `/auth/me` | GET | Get current user info (protected) |
+| `/auth/login` | POST | Login (sets HttpOnly cookies + returns JSON tokens) |
+| `/auth/refresh` | POST | Refresh access token (updates cookie) |
+| `/auth/me` | GET | Current user info |
 
-**Example Login:**
-```bash
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username":"alice","password":"Secret123"}'
-```
+### Cookie Notes
+Access & refresh tokens are also stored as HttpOnly cookies (production: Secure). Clients can still consume JSON fields for backward compatibility.
 
-Response: `{"access_token":"...","refresh_token":"...","token_type":"bearer"}`
+## Projects (`/projects`)
+- `POST /` — Create project
+- `GET /` — List projects; supports `include=metrics`
+- `GET /{id}` — Project details
+- `GET /{id}/metrics` — Project metrics (progress %, overdue, velocity)
+- `PUT /{id}` — Update (owner/admin)
+- `DELETE /{id}` — Archive (owner/admin)
 
-## Resources
+### Project Metrics Fields
+| Field | Description |
+|-------|-------------|
+| `total_tasks` | Total tasks in project |
+| `completed_tasks` | Tasks with status `done` |
+| `progress_percent` | Completion percentage |
+| `overdue_tasks` | Tasks past due date not `done` |
+| `velocity_7d` | Tasks completed in last 7 days |
 
-All resource endpoints support standard CRUD operations.
+## Tasks (`/tasks`)
+- `POST /` — Create task
+- `GET /` — List tasks (`project_id`, `assignee_id` filters)
+- `GET /{id}` — Task details
+- `PUT /{id}` — Update (creator/assignee/owner/admin)
+- `DELETE /{id}` — Delete (owner/admin)
 
-### Projects (`/projects`)
-- `POST /` - Create project
-- `GET /` - List projects
-- `GET /{id}` - Get project details
-- `PUT /{id}` - Update project (owner/admin)
-- `DELETE /{id}` - Archive project (owner/admin)
+## Channels / Messages / Users
+(As previously documented — unchanged)
 
-### Tasks (`/tasks`)
-- `POST /` - Create task
-- `GET /` - List tasks (filterable by `project_id`, `assignee_id`)
-- `GET /{id}` - Get task details
-- `PUT /{id}` - Update task (creator/assignee/owner/admin)
-- `DELETE /{id}` - Delete task (owner/admin)
-
-### Channels (`/channels`)
-- `POST /` - Create channel
-- `GET /project/{project_id}` - List project channels
-- `GET /{id}` - Get channel details
-- `PUT /{id}` - Update channel (admin)
-- `DELETE /{id}` - Delete channel (admin)
-
-### Messages (`/messages`)
-- `POST /` - Create message
-- `GET /channel/{channel_id}` - List channel messages (paginated)
-- `GET /{id}` - Get message details
-- `PUT /{id}` - Edit message (author/admin)
-- `DELETE /{id}` - Delete message (author/admin)
-
-### Users (`/users`)
-- `POST /` - Create user (public registration)
-- `GET /` - List users (admin only)
-- `GET /{id}` - Get user profile
-- `PUT /{id}` - Update user (self/admin)
-- `DELETE /{id}` - Delete user (self/admin)
-
-## Health Check
-`GET /health/` - Service health status
-
-Response includes database and Redis connectivity status.
-
-## API Documentation
-Interactive docs available at:
-- Swagger UI: http://localhost:8000/docs
-- ReDoc: http://localhost:8000/redoc
+## Health
+`GET /health/` — Basic service health (DB, cache checks)
 
 ## Common Response Codes
-- `200 OK` - Success
-- `201 Created` - Resource created
-- `204 No Content` - Success (no body)
-- `400 Bad Request` - Validation error
-- `401 Unauthorized` - Missing/invalid token
-- `403 Forbidden` - Insufficient permissions
-- `404 Not Found` - Resource not found
+Same as before: 200, 201, 204, 400, 401, 403, 404.
 
 ## Rate Limiting
-Not currently implemented (future enhancement).
+Not implemented yet (planned enhancement).
 
 ## Related Docs
-- [WebSockets](./websockets.md) - Real-time API
-- [Webhooks](./workflows.md) - Outbound notifications
-- [Implementation](./implementation.md) - Technical details
-
+- [WebSockets](./websockets.md) — Real-time rooms & events
+- [Implementation](./implementation.md)
+- [Testing](./testing.md)

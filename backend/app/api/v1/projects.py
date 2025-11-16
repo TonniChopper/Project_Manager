@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 from ...core.dependencies import get_db
 from ...core.security import get_current_user
 from ...schemas.project import ProjectCreate, ProjectUpdate, ProjectPublic, ProjectDetail, ProjectMetrics, ProjectWithMetrics
-from ...db.models import Project, Task
+from ...db.models import Project, Task, User
 from ...services.webhooks import send_webhook_sync, WebhookEventType
 
 router = APIRouter()
@@ -42,13 +42,13 @@ def _send_project_webhook(db_url: str, event_type: str, project: Project, user_i
 @router.post("/", response_model=ProjectPublic, status_code=status.HTTP_201_CREATED, summary="Create a project")
 def create_project(payload: ProjectCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
     # current_user expected to be dict with username -> map to DB user if exists
-    user = db.execute("SELECT * FROM users WHERE username = :u", {"u": current_user.get("username")}).mappings().first()
+    user = db.query(User).filter(User.username == current_user.get("username")).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found in DB")
     project = Project(
         name=payload.name,
         description=payload.description,
-        owner_id=user["id"],
+        owner_id=user.id,
         status=payload.status,
         start_date=payload.start_date,
         end_date=payload.end_date,
@@ -96,10 +96,10 @@ def update_project(project_id: int, payload: ProjectUpdate, db: Session = Depend
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     # permission: only owner or admin
     username = current_user.get("username")
-    user = db.execute("SELECT * FROM users WHERE username = :u", {"u": username}).mappings().first()
+    user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found in DB")
-    if project.owner_id != user["id"] and current_user.get("role") != "admin":
+    if project.owner_id != user.id and current_user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to update this project")
     # apply updates
     for field, value in payload.model_dump(exclude_unset=True).items():
@@ -121,10 +121,10 @@ def delete_project(
     if not project:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
     username = current_user.get("username")
-    user = db.execute("SELECT * FROM users WHERE username = :u", {"u": username}).mappings().first()
+    user = db.query(User).filter(User.username == username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found in DB")
-    if project.owner_id != user["id"] and current_user.get("role") != "admin":
+    if project.owner_id != user.id and current_user.get("role") != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to delete this project")
 
     # Send webhook before archiving (open new session inside background task)
@@ -133,8 +133,8 @@ def delete_project(
         db_url="unused",
         event_type=WebhookEventType.PROJECT_DELETED,
         project=project,
-        user_id=user["id"],
-        user_data={"username": user["username"], "email": user.get("email")}
+        user_id=user.id,
+        user_data={"username": user.username, "email": user.email}
     )
 
     # Soft-archive

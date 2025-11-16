@@ -11,11 +11,24 @@ docker-compose up -d
 ```
 
 Services:
-- **PostgreSQL 15** (port 5432)
-- **Redis 7** (port 6379)
-- **FastAPI Backend** (port 8000)
-- **n8n** (port 5678)
-- **Frontend** (port 3000, optional)
+- PostgreSQL 15 (port 5432)
+- Redis 7 (port 6379)
+- FastAPI Backend (port 8000)
+- n8n (port 5678)
+- Frontend (port 3000, via profile `full`)
+- Nginx reverse proxy (port 80, via profile `nginx`)
+
+### Profiles
+- default: core services (db, cache, app, n8n)
+- full: + frontend
+- tools: + pgadmin + redis-commander
+- nginx: + nginx reverse proxy (single entry on :80)
+
+Run with profiles:
+```powershell
+# Full stack with nginx
+docker-compose --profile full --profile nginx up -d
+```
 
 ### Management Scripts
 
@@ -44,91 +57,26 @@ DATABASE_URL=postgresql+psycopg2://postgres:password@db:5432/project_manager
 REDIS_URL=redis://cache:6379/0
 JWT_SECRET=<64-char-random>
 N8N_URL=http://n8n:5678
-```
-
-### Profiles
-
-**Default:** Core services only
-```powershell
-docker-compose up -d
-```
-
-**Full:** With frontend
-```powershell
-docker-compose --profile full up -d
-```
-
-**Tools:** With PgAdmin & Redis Commander
-```powershell
-docker-compose --profile tools up -d
+APP_ENV=development
 ```
 
 ## Health Checks
-
 All services include health checks and auto-restart.
 
-```bash
-# Check service status
+```powershell
 docker-compose ps
-
-# View specific logs
 docker-compose logs -f app
 ```
 
 ## Production Deployment
 
-### Docker
+Docker (production target):
 ```bash
 BUILD_TARGET=production docker-compose up -d
 ```
 
-### Kubernetes
-K8s manifests planned in `infra/kubernetes/`
+Notes:
+- Serve via Nginx reverse proxy; single entry at :80
+- Use HTTPS/TLS in production; set Secure cookies
 
-### Terraform
-IaC provisioning planned in `infra/terraform/`
-
-## Monitoring
-
-Health endpoint: `GET /api/v1/health/`
-
-Response includes:
-- Service status
-- Database connectivity
-- Redis connectivity
-- Response times
-
-## Backups
-
-```powershell
-# Database backup
-./scripts/manage.ps1 db-backup
-
-# Restore
-./scripts/manage.ps1 db-restore
-```
-
-## Scaling
-
-### Horizontal Scaling
-- WebSocket: Redis pub/sub enables multi-instance
-- API: Stateless, can run multiple replicas
-- Database: Single primary (replication can be added)
-
-### Vertical Scaling
-Adjust resources in `docker-compose.yml`:
-```yaml
-services:
-  app:
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-```
-
-## Related Docs
-- [Docker Setup](./docker.md) - Development environment
-- [Getting Started](./getting-started.md) - Initial setup
-- Full infra guide: `infra/README.md`
-
+Last Updated: 2025-11-16
