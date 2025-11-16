@@ -24,7 +24,7 @@ const Hero = styled.div`
 const HeroTitle = styled.h1`
   font-size: ${({ theme }) => theme.fontSizes.xxxxl};
   margin-bottom: ${({ theme }) => theme.spacing.md};
-  
+
   @media (max-width: 768px) {
     font-size: ${({ theme }) => theme.fontSizes.xxxl};
   }
@@ -46,12 +46,12 @@ const StatsGrid = styled.div`
 
 const StatCard = styled(GlassCard)`
   text-align: center;
-  
+
   h3 {
     font-size: ${({ theme }) => theme.fontSizes.xxxl};
     margin-bottom: ${({ theme }) => theme.spacing.sm};
   }
-  
+
   p {
     color: ${({ theme }) => theme.text.secondary};
     font-size: ${({ theme }) => theme.fontSizes.md};
@@ -75,11 +75,11 @@ const ActionCard = styled(GradientCard)`
   justify-content: center;
   min-height: 150px;
   gap: ${({ theme }) => theme.spacing.md};
-  
+
   .icon {
     font-size: ${({ theme }) => theme.fontSizes.xxxxl};
   }
-  
+
   .title {
     font-size: ${({ theme }) => theme.fontSizes.xl};
     font-weight: ${({ theme }) => theme.fontWeights.bold};
@@ -101,30 +101,30 @@ const ActivityItem = styled(GlassCard)`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  
+
   .left {
     display: flex;
     align-items: center;
     gap: ${({ theme }) => theme.spacing.md};
   }
-  
+
   .icon {
     font-size: ${({ theme }) => theme.fontSizes.xxl};
   }
-  
+
   .content {
     h4 {
       margin: 0 0 ${({ theme }) => theme.spacing.xs} 0;
       font-size: ${({ theme }) => theme.fontSizes.md};
     }
-    
+
     p {
       margin: 0;
       color: ${({ theme }) => theme.text.secondary};
       font-size: ${({ theme }) => theme.fontSizes.sm};
     }
   }
-  
+
   .time {
     color: ${({ theme }) => theme.text.tertiary};
     font-size: ${({ theme }) => theme.fontSizes.sm};
@@ -135,13 +135,13 @@ const EmptyState = styled.div`
   text-align: center;
   padding: ${({ theme }) => `${theme.spacing.xxxl} 0`};
   color: ${({ theme }) => theme.text.secondary};
-  
+
   .icon {
     font-size: 64px;
     margin-bottom: ${({ theme }) => theme.spacing.lg};
     opacity: 0.5;
   }
-  
+
   p {
     font-size: ${({ theme }) => theme.fontSizes.lg};
   }
@@ -205,9 +205,7 @@ function Home() {
           transition={{ duration: 0.8 }}
         >
           <HeroTitle>
-            <GradientText $gradient="cosmic">
-              Welcome to Project Manager
-            </GradientText>
+            <GradientText $gradient="cosmic">Welcome to Project Manager</GradientText>
           </HeroTitle>
           <HeroSubtitle>
             Your AI-powered workspace for managing projects, tasks, and team collaboration
@@ -216,11 +214,7 @@ function Home() {
       </Hero>
 
       {/* Stats Section */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
+      <motion.div variants={containerVariants} initial="hidden" animate="visible">
         <StatsGrid>
           {stats.map((stat, index) => (
             <StatCard
@@ -230,9 +224,7 @@ function Home() {
               whileHover={{ scale: 1.05 }}
             >
               <h3>
-                <GradientText $gradient={stat.gradient}>
-                  {stat.value}
-                </GradientText>
+                <GradientText $gradient={stat.gradient}>{stat.value}</GradientText>
               </h3>
               <p>{stat.label}</p>
             </StatCard>
@@ -320,4 +312,3 @@ function Home() {
 }
 
 export default Home;
-

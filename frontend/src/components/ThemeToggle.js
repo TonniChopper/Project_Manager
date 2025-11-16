@@ -7,14 +7,13 @@ const ToggleContainer = styled.div`
   position: relative;
   width: 60px;
   height: 30px;
-  background: ${({ theme, $isDark }) =>
-    $isDark ? theme.colors.gray700 : theme.colors.gray300};
+  background: ${({ theme, $isDark }) => ($isDark ? theme.colors.gray700 : theme.colors.gray300)};
   border-radius: ${({ theme }) => theme.radius.full};
   cursor: pointer;
   transition: background ${({ theme }) => theme.transitions.normal};
   box-shadow: ${({ theme }) => theme.shadows.inner};
   overflow: hidden;
-  
+
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.glow};
   }
@@ -64,7 +63,7 @@ const ThemeToggle = ({ showLabel = false }) => {
         role="button"
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
         tabIndex={0}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if (e.key === 'Enter' || e.key === ' ') {
             toggleTheme();
           }
@@ -91,4 +90,3 @@ const ThemeToggle = ({ showLabel = false }) => {
 };
 
 export default ThemeToggle;
-

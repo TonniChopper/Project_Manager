@@ -12,11 +12,11 @@ import Chat from './pages/Chat';
 import Login from './pages/Login';
 
 // Import components
-import Layout from './components/Layout';
+import AppLayout from './components/AppLayout';
 
 function App() {
   // TODO: Add authentication logic
-  const isAuthenticated = false;
+  const isAuthenticated = true; // Set to true for demo
 
   return (
     <ThemeProvider>
@@ -31,9 +31,9 @@ function App() {
             path="/"
             element={
               isAuthenticated ? (
-                <Layout>
+                <AppLayout>
                   <Home />
-                </Layout>
+                </AppLayout>
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -43,9 +43,9 @@ function App() {
             path="/projects"
             element={
               isAuthenticated ? (
-                <Layout>
+                <AppLayout>
                   <Projects />
-                </Layout>
+                </AppLayout>
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -55,9 +55,9 @@ function App() {
             path="/tasks"
             element={
               isAuthenticated ? (
-                <Layout>
+                <AppLayout>
                   <Tasks />
-                </Layout>
+                </AppLayout>
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -67,9 +67,9 @@ function App() {
             path="/chat"
             element={
               isAuthenticated ? (
-                <Layout>
+                <AppLayout>
                   <Chat />
-                </Layout>
+                </AppLayout>
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -85,4 +85,3 @@ function App() {
 }
 
 export default App;
-

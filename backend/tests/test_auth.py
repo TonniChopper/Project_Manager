@@ -18,9 +18,9 @@ def test_register_and_login(client: TestClient):
     assert r3.json()["username"] == "alice"
 
 
-def test_refresh_flow(client: TestClient):
-    # Use existing user
-    r = client.post("/api/v1/auth/login", json={"username": "alice", "password": "Secret123"})
+def test_refresh_flow(client: TestClient, test_user):
+    # Use existing user from fixture
+    r = client.post("/api/v1/auth/login", json={"username": test_user["username"], "password": test_user["password"]})
     assert r.status_code == 200
     data = r.json()
     refresh = data["refresh_token"]
@@ -35,6 +35,6 @@ def test_refresh_flow(client: TestClient):
     assert data2["user"]["username"] == "alice"
 
 
-def test_login_fail(client: TestClient):
-    r = client.post("/api/v1/auth/login", json={"username": "alice", "password": "wrong"})
+def test_login_fail(client: TestClient, test_user):
+    r = client.post("/api/v1/auth/login", json={"username": test_user["username"], "password": "wrong"})
     assert r.status_code == 401

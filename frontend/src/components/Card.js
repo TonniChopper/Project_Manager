@@ -12,4 +12,3 @@ function Card({ children, className = '', hover = false, onClick, ...props }) {
 }
 
 export default Card;
-

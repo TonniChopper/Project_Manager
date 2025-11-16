@@ -40,7 +40,7 @@ const Logo = styled(Link)`
   color: ${({ theme }) => theme.text.primary};
   text-decoration: none;
   transition: transform ${({ theme }) => theme.transitions.fast};
-  
+
   &:hover {
     transform: scale(1.05);
   }
@@ -58,9 +58,10 @@ const LogoText = styled.span`
   -webkit-text-fill-color: transparent;
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
-  
+
   @keyframes gradientShift {
-    0%, 100% {
+    0%,
+    100% {
       background-position: 0% 50%;
     }
     50% {
@@ -72,7 +73,7 @@ const LogoText = styled.span`
 const Nav = styled.nav`
   display: flex;
   gap: ${({ theme }) => theme.spacing.md};
-  
+
   @media (max-width: 768px) {
     display: none;
   }
@@ -81,14 +82,13 @@ const Nav = styled.nav`
 const NavLink = styled(Link)`
   position: relative;
   padding: ${({ theme }) => `${theme.spacing.sm} ${theme.spacing.md}`};
-  color: ${({ theme, $active }) =>
-    $active ? theme.colors.primary : theme.text.secondary};
+  color: ${({ theme, $active }) => ($active ? theme.colors.primary : theme.text.secondary)};
   font-weight: ${({ theme, $active }) =>
     $active ? theme.fontWeights.semibold : theme.fontWeights.medium};
   text-decoration: none;
   border-radius: ${({ theme }) => theme.radius.md};
   transition: all ${({ theme }) => theme.transitions.fast};
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -101,10 +101,10 @@ const NavLink = styled(Link)`
     border-radius: ${({ theme }) => theme.radius.full};
     transition: width ${({ theme }) => theme.transitions.normal};
   }
-  
+
   &:hover {
     color: ${({ theme }) => theme.colors.primary};
-    
+
     &::before {
       width: 80%;
     }
@@ -128,7 +128,7 @@ const ProfileButton = styled(motion.button)`
   font-weight: ${({ theme }) => theme.fontWeights.medium};
   cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.normal};
-  
+
   &:hover {
     background: ${({ theme }) => theme.background.glassHover};
     transform: translateY(-2px);
@@ -167,7 +167,7 @@ const FooterContent = styled.div`
 
 function Layout({ children }) {
   const location = useLocation();
-  const isActive = (path) => location.pathname === path;
+  const isActive = path => location.pathname === path;
 
   return (
     <LayoutWrapper>
@@ -195,10 +195,7 @@ function Layout({ children }) {
 
           <HeaderActions>
             <ThemeToggle />
-            <ProfileButton
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
+            <ProfileButton whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               Profile
             </ProfileButton>
           </HeaderActions>
@@ -219,4 +216,3 @@ function Layout({ children }) {
 }
 
 export default Layout;
-

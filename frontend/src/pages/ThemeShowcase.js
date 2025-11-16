@@ -55,7 +55,7 @@ const Hero = styled.div`
 const HeroTitle = styled.h1`
   font-size: ${({ theme }) => theme.fontSizes.xxxxl};
   margin-bottom: ${({ theme }) => theme.spacing.lg};
-  
+
   @media (max-width: 768px) {
     font-size: ${({ theme }) => theme.fontSizes.xxxl};
   }
@@ -71,7 +71,7 @@ const HeroSubtitle = styled.p`
 const ThemeShowcase = () => {
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({
+    visible: i => ({
       opacity: 1,
       y: 0,
       transition: {
@@ -92,9 +92,7 @@ const ThemeShowcase = () => {
           transition={{ duration: 0.8 }}
         >
           <HeroTitle>
-            <GradientText $gradient="cosmic">
-              Eye-Catching Theme Showcase
-            </GradientText>
+            <GradientText $gradient="cosmic">Eye-Catching Theme Showcase</GradientText>
           </HeroTitle>
           <HeroSubtitle>
             Explore our stunning visual components with glassmorphism, gradients, and neon effects
@@ -131,16 +129,10 @@ const ThemeShowcase = () => {
         <GradientDivider $gradient="aurora" />
 
         <ButtonGroup>
-          <GlassButton
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <GlassButton whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             Glass Button
           </GlassButton>
-          <GlassButton
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <GlassButton whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             Another Glass
           </GlassButton>
         </ButtonGroup>
@@ -152,7 +144,7 @@ const ThemeShowcase = () => {
           <GradientText $gradient="ocean">Glass Cards</GradientText>
         </SectionTitle>
         <Grid>
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2].map(i => (
             <GlassCard
               key={i}
               custom={i}
@@ -163,8 +155,8 @@ const ThemeShowcase = () => {
             >
               <h3 style={{ marginBottom: '1rem' }}>Glass Card {i + 1}</h3>
               <p style={{ color: 'var(--text-secondary)' }}>
-                Beautiful glassmorphism effect with backdrop blur and smooth animations.
-                Hover to see the magic!
+                Beautiful glassmorphism effect with backdrop blur and smooth animations. Hover to
+                see the magic!
               </p>
             </GlassCard>
           ))}
@@ -177,24 +169,15 @@ const ThemeShowcase = () => {
           <GradientText $gradient="sunset">Gradient Cards</GradientText>
         </SectionTitle>
         <Grid>
-          <GradientCard
-            $gradient="primary"
-            whileHover={{ scale: 1.05, rotate: 1 }}
-          >
+          <GradientCard $gradient="primary" whileHover={{ scale: 1.05, rotate: 1 }}>
             <h3 style={{ marginBottom: '1rem' }}>Primary Gradient</h3>
             <p>Vibrant purple gradient with animated overlay effect</p>
           </GradientCard>
-          <GradientCard
-            $gradient="cosmic"
-            whileHover={{ scale: 1.05, rotate: -1 }}
-          >
+          <GradientCard $gradient="cosmic" whileHover={{ scale: 1.05, rotate: -1 }}>
             <h3 style={{ marginBottom: '1rem' }}>Cosmic Gradient</h3>
             <p>Stunning pink to yellow gradient combination</p>
           </GradientCard>
-          <GradientCard
-            $gradient="ocean"
-            whileHover={{ scale: 1.05, rotate: 1 }}
-          >
+          <GradientCard $gradient="ocean" whileHover={{ scale: 1.05, rotate: 1 }}>
             <h3 style={{ marginBottom: '1rem' }}>Ocean Gradient</h3>
             <p>Calm and soothing ocean-inspired colors</p>
           </GradientCard>
@@ -226,24 +209,16 @@ const ThemeShowcase = () => {
         </SectionTitle>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <h2>
-            <GradientText $gradient="primary">
-              This is Primary Gradient Text
-            </GradientText>
+            <GradientText $gradient="primary">This is Primary Gradient Text</GradientText>
           </h2>
           <h2>
-            <GradientText $gradient="cosmic">
-              This is Cosmic Gradient Text
-            </GradientText>
+            <GradientText $gradient="cosmic">This is Cosmic Gradient Text</GradientText>
           </h2>
           <h2>
-            <GradientText $gradient="sunset">
-              This is Sunset Gradient Text
-            </GradientText>
+            <GradientText $gradient="sunset">This is Sunset Gradient Text</GradientText>
           </h2>
           <h2>
-            <GradientText $gradient="neon">
-              This is Neon Gradient Text
-            </GradientText>
+            <GradientText $gradient="neon">This is Neon Gradient Text</GradientText>
           </h2>
         </div>
       </Section>
@@ -276,4 +251,3 @@ const ThemeShowcase = () => {
 };
 
 export default ThemeShowcase;
-

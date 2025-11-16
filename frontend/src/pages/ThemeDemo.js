@@ -71,7 +71,7 @@ const DemoCard = styled(GlassCard)`
     margin-bottom: ${({ theme }) => theme.spacing.md};
     font-size: ${({ theme }) => theme.fontSizes.xl};
   }
-  
+
   p {
     color: ${({ theme }) => theme.text.secondary};
     margin-bottom: ${({ theme }) => theme.spacing.lg};
@@ -92,7 +92,7 @@ const Counter = styled.div`
 const FormGroup = styled.div`
   margin-bottom: ${({ theme }) => theme.spacing.md};
   text-align: left;
-  
+
   label {
     display: block;
     margin-bottom: ${({ theme }) => theme.spacing.sm};
@@ -121,13 +121,11 @@ function ThemeDemo() {
             transition={{ duration: 0.8 }}
           >
             <Title>
-              <GradientText $gradient="cosmic">
-                🎨 Theme System Demo
-              </GradientText>
+              <GradientText $gradient="cosmic">🎨 Theme System Demo</GradientText>
             </Title>
             <Subtitle>
-              Explore our stunning visual components with glassmorphism, vibrant gradients, and smooth animations.
-              Try interacting with the elements below!
+              Explore our stunning visual components with glassmorphism, vibrant gradients, and
+              smooth animations. Try interacting with the elements below!
             </Subtitle>
           </motion.div>
         </SectionHeader>
@@ -166,7 +164,7 @@ function ThemeDemo() {
           <GradientText $gradient="sunset">Glass Cards</GradientText>
         </h2>
         <Grid>
-          {[1, 2, 3].map((num) => (
+          {[1, 2, 3].map(num => (
             <DemoCard
               key={num}
               as={motion.div}
@@ -197,7 +195,7 @@ function ThemeDemo() {
           <h3>Button Variants</h3>
           <p>Glowing buttons with ripple effects on click</p>
           <FlexContainer $justify="center">
-            {buttonVariants.map((variant) => (
+            {buttonVariants.map(variant => (
               <NeonButton key={variant} $variant={variant} $size="md">
                 {variant.charAt(0).toUpperCase() + variant.slice(1)}
               </NeonButton>
@@ -206,9 +204,15 @@ function ThemeDemo() {
 
           <h3 style={{ marginTop: '2rem' }}>Button Sizes</h3>
           <FlexContainer $justify="center" $align="center">
-            <NeonButton $variant="primary" $size="sm">Small</NeonButton>
-            <NeonButton $variant="primary" $size="md">Medium</NeonButton>
-            <NeonButton $variant="primary" $size="lg">Large</NeonButton>
+            <NeonButton $variant="primary" $size="sm">
+              Small
+            </NeonButton>
+            <NeonButton $variant="primary" $size="md">
+              Medium
+            </NeonButton>
+            <NeonButton $variant="primary" $size="lg">
+              Large
+            </NeonButton>
           </FlexContainer>
 
           <h3 style={{ marginTop: '2rem' }}>Glass Buttons</h3>
@@ -233,7 +237,7 @@ function ThemeDemo() {
         <DemoCard>
           <h3>Badge Variants</h3>
           <FlexContainer $justify="center">
-            {badgeVariants.map((variant) => (
+            {badgeVariants.map(variant => (
               <Badge key={variant} $variant={variant}>
                 {variant.charAt(0).toUpperCase() + variant.slice(1)}
               </Badge>
@@ -242,9 +246,15 @@ function ThemeDemo() {
 
           <h3 style={{ marginTop: '2rem' }}>Glowing Badges</h3>
           <FlexContainer $justify="center">
-            <Badge $variant="primary" $glow>Pulsing</Badge>
-            <Badge $variant="secondary" $glow>Animated</Badge>
-            <Badge $variant="success" $glow>Glowing</Badge>
+            <Badge $variant="primary" $glow>
+              Pulsing
+            </Badge>
+            <Badge $variant="secondary" $glow>
+              Animated
+            </Badge>
+            <Badge $variant="success" $glow>
+              Glowing
+            </Badge>
           </FlexContainer>
         </DemoCard>
       </Section>
@@ -259,30 +269,16 @@ function ThemeDemo() {
         <InteractiveDemo>
           <h3>Click the buttons to change the counter</h3>
           <Counter>
-            <GradientText $gradient="cosmic">
-              {count}
-            </GradientText>
+            <GradientText $gradient="cosmic">{count}</GradientText>
           </Counter>
           <FlexContainer $justify="center">
-            <NeonButton
-              $variant="accent"
-              $size="lg"
-              onClick={() => setCount(count - 1)}
-            >
+            <NeonButton $variant="accent" $size="lg" onClick={() => setCount(count - 1)}>
               Decrease
             </NeonButton>
-            <NeonButton
-              $variant="primary"
-              $size="lg"
-              onClick={() => setCount(0)}
-            >
+            <NeonButton $variant="primary" $size="lg" onClick={() => setCount(0)}>
               Reset
             </NeonButton>
-            <NeonButton
-              $variant="secondary"
-              $size="lg"
-              onClick={() => setCount(count + 1)}
-            >
+            <NeonButton $variant="secondary" $size="lg" onClick={() => setCount(count + 1)}>
               Increase
             </NeonButton>
           </FlexContainer>
@@ -305,7 +301,7 @@ function ThemeDemo() {
               type="text"
               placeholder="Enter your name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={e => setFormData({ ...formData, name: e.target.value })}
             />
           </FormGroup>
           <FormGroup>
@@ -315,7 +311,7 @@ function ThemeDemo() {
               type="email"
               placeholder="your.email@example.com"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              onChange={e => setFormData({ ...formData, email: e.target.value })}
             />
           </FormGroup>
           <NeonButton
@@ -353,8 +349,18 @@ function ThemeDemo() {
         whileTap={{ scale: 0.9 }}
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M5 10l7-7m0 0l7 7m-7-7v18"
+          />
         </svg>
       </FloatingActionButton>
 
@@ -385,4 +391,3 @@ function ThemeDemo() {
 }
 
 export default ThemeDemo;
-

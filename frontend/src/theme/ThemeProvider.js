@@ -34,7 +34,7 @@ export const ThemeProvider = ({ children }) => {
   }, [isDark]);
 
   const toggleTheme = () => {
-    setIsDark((prev) => !prev);
+    setIsDark(prev => !prev);
   };
 
   const value = {
@@ -51,4 +51,3 @@ export const ThemeProvider = ({ children }) => {
 };
 
 export default ThemeProvider;
-

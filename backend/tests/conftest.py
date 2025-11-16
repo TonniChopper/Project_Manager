@@ -66,3 +66,15 @@ app.dependency_overrides[get_db] = override_get_db
 def client() -> TestClient:
     return TestClient(app)
 
+@pytest.fixture(scope="function")
+def test_user(client: TestClient):
+    """Create a test user for authentication tests"""
+    response = client.post(
+        "/api/v1/auth/register",
+        json={"username": "alice", "password": "Secret123", "email": "alice@example.com"}
+    )
+    if response.status_code == 201:
+        return {"username": "alice", "password": "Secret123", "email": "alice@example.com"}
+    # User might already exist, return anyway
+    return {"username": "alice", "password": "Secret123", "email": "alice@example.com"}
+

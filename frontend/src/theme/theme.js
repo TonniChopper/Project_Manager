@@ -265,8 +265,10 @@ export const darkTheme = {
     glow: '0 0 30px rgba(124, 58, 237, 0.7)',
     glowLg: '0 0 60px rgba(124, 58, 237, 0.8)',
     neon: '0 0 10px rgba(124, 58, 237, 0.8), 0 0 30px rgba(124, 58, 237, 0.5), 0 0 50px rgba(124, 58, 237, 0.3)',
-    neonPink: '0 0 10px rgba(236, 72, 153, 0.8), 0 0 30px rgba(236, 72, 153, 0.5), 0 0 50px rgba(236, 72, 153, 0.3)',
-    neonCyan: '0 0 10px rgba(6, 182, 212, 0.8), 0 0 30px rgba(6, 182, 212, 0.5), 0 0 50px rgba(6, 182, 212, 0.3)',
+    neonPink:
+      '0 0 10px rgba(236, 72, 153, 0.8), 0 0 30px rgba(236, 72, 153, 0.5), 0 0 50px rgba(236, 72, 153, 0.3)',
+    neonCyan:
+      '0 0 10px rgba(6, 182, 212, 0.8), 0 0 30px rgba(6, 182, 212, 0.5), 0 0 50px rgba(6, 182, 212, 0.3)',
 
     // Glass effect in dark
     glass: '0 8px 32px 0 rgba(0, 0, 0, 0.4)',
@@ -274,4 +276,3 @@ export const darkTheme = {
 };
 
 export default { light: lightTheme, dark: darkTheme };
-

@@ -1,32 +1,25 @@
 import React from 'react';
-export default Button;
-
-}
-  );
-    </button>
-      <span>{children}</span>
-      {icon && <span className="btn-icon">{icon}</span>}
-    >
-      {...props}
-      disabled={disabled}
-      onClick={onClick}
-      className={buttonClass}
-      type={type}
-    <button
-  return (
-
-  const buttonClass = `btn btn-${variant} btn-${size} ${className}`;
-}) {
-  ...props
-  className = '',
-  type = 'button',
-  disabled = false,
-  onClick,
-  icon = null,
-  size = 'medium',
-  variant = 'primary',
-  children,
-function Button({
-
 import './Button.css';
 
+function Button({
+  children,
+  variant = 'primary',
+  size = 'medium',
+  icon = null,
+  onClick,
+  disabled = false,
+  type = 'button',
+  className = '',
+  ...props
+}) {
+  const buttonClass = `btn btn-${variant} btn-${size} ${className}`;
+
+  return (
+    <button type={type} className={buttonClass} onClick={onClick} disabled={disabled} {...props}>
+      {icon && <span className="btn-icon">{icon}</span>}
+      <span>{children}</span>
+    </button>
+  );
+}
+
+export default Button;

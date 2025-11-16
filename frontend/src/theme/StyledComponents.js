@@ -11,7 +11,7 @@ export const GlassCard = styled(motion.div)`
   padding: ${({ theme, $padding = 'lg' }) => theme.spacing[$padding]};
   box-shadow: ${({ theme }) => theme.shadows.glass};
   transition: all ${({ theme }) => theme.transitions.normal};
-  
+
   &:hover {
     background: ${({ theme }) => theme.background.glassHover};
     transform: translateY(-4px);
@@ -29,7 +29,7 @@ export const GradientCard = styled(motion.div)`
   position: relative;
   overflow: hidden;
   transition: all ${({ theme }) => theme.transitions.normal};
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -37,19 +37,15 @@ export const GradientCard = styled(motion.div)`
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(
-      circle,
-      rgba(255, 255, 255, 0.2) 0%,
-      transparent 70%
-    );
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
     opacity: 0;
     transition: opacity ${({ theme }) => theme.transitions.slow};
   }
-  
+
   &:hover {
     transform: scale(1.02);
     box-shadow: ${({ theme }) => theme.shadows.xxl};
-    
+
     &::before {
       opacity: 1;
     }
@@ -100,7 +96,7 @@ export const NeonButton = styled(motion.button)`
     };
     return shadows[$variant];
   }};
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -111,10 +107,11 @@ export const NeonButton = styled(motion.button)`
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.3);
     transform: translate(-50%, -50%);
-    transition: width ${({ theme }) => theme.transitions.slow},
-                height ${({ theme }) => theme.transitions.slow};
+    transition:
+      width ${({ theme }) => theme.transitions.slow},
+      height ${({ theme }) => theme.transitions.slow};
   }
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: ${({ theme, $variant = 'primary' }) => {
@@ -126,21 +123,21 @@ export const NeonButton = styled(motion.button)`
       };
       return shadows[$variant];
     }};
-    
+
     &::before {
       width: 300px;
       height: 300px;
     }
   }
-  
+
   &:active {
     transform: translateY(0);
   }
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    
+
     &:hover {
       transform: none;
     }
@@ -161,13 +158,13 @@ export const GlassButton = styled(motion.button)`
   cursor: pointer;
   transition: all ${({ theme }) => theme.transitions.normal};
   box-shadow: ${({ theme }) => theme.shadows.glass};
-  
+
   &:hover {
     background: ${({ theme }) => theme.background.glassHover};
     transform: translateY(-2px);
     box-shadow: ${({ theme }) => theme.shadows.lg};
   }
-  
+
   &:active {
     transform: translateY(0);
   }
@@ -182,9 +179,10 @@ export const GradientText = styled.span`
   background-size: 200% 200%;
   animation: gradientShift 3s ease infinite;
   font-weight: ${({ theme, $weight = 'bold' }) => theme.fontWeights[$weight]};
-  
+
   @keyframes gradientShift {
-    0%, 100% {
+    0%,
+    100% {
       background-position: 0% 50%;
     }
     50% {
@@ -206,17 +204,17 @@ export const GlassInput = styled.input`
   border-radius: ${({ theme }) => theme.radius.lg};
   outline: none;
   transition: all ${({ theme }) => theme.transitions.normal};
-  
+
   &::placeholder {
     color: ${({ theme }) => theme.text.tertiary};
   }
-  
+
   &:focus {
     border-color: ${({ theme }) => theme.colors.primary};
     box-shadow: ${({ theme }) => theme.shadows.neon};
     background: ${({ theme }) => theme.background.glassHover};
   }
-  
+
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
@@ -240,18 +238,18 @@ export const FloatingActionButton = styled(motion.button)`
   box-shadow: ${({ theme }) => theme.shadows.glowLg};
   z-index: ${({ theme }) => theme.zIndices.sticky};
   transition: all ${({ theme }) => theme.transitions.normal};
-  
+
   svg {
     width: 24px;
     height: 24px;
     color: ${({ theme }) => theme.colors.white};
   }
-  
+
   &:hover {
     transform: scale(1.1) rotate(90deg);
     box-shadow: 0 0 60px ${({ theme }) => theme.colors.primaryGlow};
   }
-  
+
   &:active {
     transform: scale(0.95) rotate(90deg);
   }
@@ -288,8 +286,10 @@ export const Badge = styled.span`
     };
     return shadows[$variant];
   }};
-  
-  ${({ $glow }) => $glow && `
+
+  ${({ $glow }) =>
+    $glow &&
+    `
     animation: glow 2s ease-in-out infinite;
   `}
 `;
@@ -312,7 +312,7 @@ export const SkeletonLoader = styled.div`
   border-radius: ${({ theme, $radius = 'md' }) => theme.radius[$radius]};
   height: ${({ $height = '20px' }) => $height};
   width: ${({ $width = '100%' }) => $width};
-  
+
   @keyframes shimmer {
     0% {
       background-position: -200% 0;
@@ -344,4 +344,3 @@ export default {
   SkeletonLoader,
   GradientDivider,
 };
-

@@ -6,4 +6,3 @@ test('renders project manager', () => {
   const linkElement = screen.getByText(/project manager/i);
   expect(linkElement).toBeInTheDocument();
 });
-

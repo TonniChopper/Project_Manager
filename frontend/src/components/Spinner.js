@@ -10,4 +10,3 @@ function Spinner({ size = 'medium', color = 'primary' }) {
 }
 
 export default Spinner;
-

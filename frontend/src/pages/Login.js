@@ -30,16 +30,10 @@ function Login() {
           <p className="subtitle">AI-Powered Platform</p>
 
           <div className="auth-toggle">
-            <button
-              className={isLogin ? 'active' : ''}
-              onClick={() => setIsLogin(true)}
-            >
+            <button className={isLogin ? 'active' : ''} onClick={() => setIsLogin(true)}>
               Login
             </button>
-            <button
-              className={!isLogin ? 'active' : ''}
-              onClick={() => setIsLogin(false)}
-            >
+            <button className={!isLogin ? 'active' : ''} onClick={() => setIsLogin(false)}>
               Register
             </button>
           </div>
@@ -98,4 +92,3 @@ function Login() {
 }
 
 export default Login;
-
