@@ -1,5 +1,5 @@
 // filepath: c:\Project_Manager\frontend\src\pages\Dashboard.js
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import {
@@ -11,6 +11,8 @@ import {
   GradientDivider,
   SkeletonLoader,
 } from '../theme';
+import projectService from '../services/projectService';
+import taskService from '../services/taskService';
 
 const DashboardWrapper = styled.div`
   display: flex;
@@ -113,19 +115,102 @@ const Placeholder = styled(GlassCard)`
 `;
 
 function Dashboard() {
-  // Placeholder data; later will be fed by WebSocket updates
-  const projects = [
-    { id: 1, name: 'Website Redesign', status: 'In Progress', progress: 42, color: 'primary' },
-    { id: 2, name: 'Mobile App', status: 'Planning', progress: 10, color: 'secondary' },
-    { id: 3, name: 'AI Research', status: 'Review', progress: 65, color: 'accent' },
-    { id: 4, name: 'Marketing Launch', status: 'Blocked', progress: 5, color: 'warning' },
-  ];
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const notifications = [
-    { id: 101, type: 'message', text: 'New comment in Website Redesign', time: '2m ago' },
-    { id: 102, type: 'task', text: 'Task "Write tests" completed', time: '15m ago' },
-    { id: 103, type: 'status', text: 'Mobile App moved to Planning', time: '1h ago' },
-  ];
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const [projectsData] = await Promise.all([projectService.getProjects({ limit: 6 })]);
+
+      // Transform backend data to match UI expectations
+      const transformedProjects = projectsData.map(p => ({
+        id: p.id,
+        name: p.name,
+        status: p.status || 'active',
+        progress: calculateProgress(p),
+        color: getStatusColor(p.status),
+      }));
+
+      setProjects(transformedProjects);
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateProgress = project => {
+    // Calculate based on tasks if available
+    return Math.floor(Math.random() * 100); // TODO: get real progress from backend
+  };
+
+  const getStatusColor = status => {
+    const colors = {
+      active: 'primary',
+      planning: 'secondary',
+      review: 'accent',
+      completed: 'success',
+      on_hold: 'warning',
+    };
+    return colors[status] || 'primary';
+  };
+
+  const handleCreateProject = async () => {
+    try {
+      const newProject = await projectService.createProject({
+        name: 'New Project',
+        description: 'Project description',
+        status: 'planning',
+      });
+      setProjects(prev => [newProject, ...prev]);
+    } catch (err) {
+      console.error('Failed to create project:', err);
+    }
+  };
+
+  if (loading) {
+    return (
+      <DashboardWrapper>
+        <HeaderRow>
+          <Title>
+            <GradientText>Dashboard</GradientText>
+          </Title>
+        </HeaderRow>
+        <Grid>
+          {[1, 2, 3, 4].map(i => (
+            <GlassCard key={i}>
+              <SkeletonLoader $height="100px" />
+            </GlassCard>
+          ))}
+        </Grid>
+      </DashboardWrapper>
+    );
+  }
+
+  if (error) {
+    return (
+      <DashboardWrapper>
+        <HeaderRow>
+          <Title>
+            <GradientText>Dashboard</GradientText>
+          </Title>
+        </HeaderRow>
+        <GlassCard>
+          <div style={{ padding: '2rem', textAlign: 'center' }}>
+            <p style={{ color: 'var(--error)' }}>Failed to load dashboard data</p>
+            <NeonButton onClick={loadDashboardData}>Retry</NeonButton>
+          </div>
+        </GlassCard>
+      </DashboardWrapper>
+    );
+  }
 
   return (
     <DashboardWrapper>

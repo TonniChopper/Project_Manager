@@ -17,9 +17,11 @@ import Settings from './pages/Settings';
 // Import components
 import AppLayout from './components/AppLayout';
 
+// Import services
+import { authService } from './services/authService';
+
 function App() {
-  // TODO: Add authentication logic
-  const isAuthenticated = true; // Set to true for demo
+  const isAuthenticated = authService.isAuthenticated();
 
   return (
     <ThemeProvider>

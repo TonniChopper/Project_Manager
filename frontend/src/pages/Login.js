@@ -1,90 +1,120 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import { authService } from '../services/authService';
 
 function Login() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-    email: '',
-  });
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    // TODO: Implement authentication
-    console.log('Form submitted:', formData);
-  };
+    setError('');
+    setLoading(true);
 
-  const handleChange = e => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    try {
+      if (isRegistering) {
+        await authService.register(username, email, password);
+        // After registration, log in automatically
+        await authService.login(username, password);
+      } else {
+        await authService.login(username, password);
+      }
+      navigate('/');
+    } catch (err) {
+      console.error('Authentication failed:', err);
+      setError(err.response?.data?.detail || 'Authentication failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="login-page">
-      <div className="login-container">
-        <div className="login-card card">
-          <h1>Project Manager</h1>
-          <p className="subtitle">AI-Powered Platform</p>
+      <div className="login-container card">
+        <h1>{isRegistering ? 'Create Account' : 'Welcome Back'}</h1>
+        <p className="subtitle">
+          {isRegistering ? 'Sign up to get started' : 'Sign in to your account'}
+        </p>
 
-          <div className="auth-toggle">
-            <button className={isLogin ? 'active' : ''} onClick={() => setIsLogin(true)}>
-              Login
-            </button>
-            <button className={!isLogin ? 'active' : ''} onClick={() => setIsLogin(false)}>
-              Register
-            </button>
+        {error && (
+          <div
+            className="error-message"
+            style={{
+              padding: '0.75rem',
+              marginBottom: '1rem',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '0.5rem',
+              color: '#ef4444',
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              className="form-control"
+              placeholder="Enter your username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
+            />
           </div>
 
-          <form onSubmit={handleSubmit}>
-            {!isLogin && (
-              <div className="form-group">
-                <label htmlFor="email">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            )}
-
+          {isRegistering && (
             <div className="form-group">
-              <label htmlFor="username">Username</label>
+              <label htmlFor="email">Email</label>
               <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
+                type="email"
+                id="email"
+                className="form-control"
+                placeholder="Enter your email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
                 required
               />
             </div>
+          )}
 
-            <div className="form-group">
-              <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <button type="submit" className="btn btn-primary btn-full">
-              {isLogin ? 'Login' : 'Register'}
-            </button>
-          </form>
-
-          <div className="login-footer">
-            <a href="#forgot">Forgot password?</a>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              className="form-control"
+              placeholder="Enter your password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+            />
           </div>
+
+          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+            {loading ? 'Please wait...' : isRegistering ? 'Sign Up' : 'Sign In'}
+          </button>
+        </form>
+
+        <div className="login-footer">
+          <button
+            className="btn-link"
+            onClick={() => {
+              setIsRegistering(!isRegistering);
+              setError('');
+            }}
+          >
+            {isRegistering ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+          </button>
         </div>
       </div>
     </div>

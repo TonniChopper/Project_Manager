@@ -1,193 +1,148 @@
-# Project Manager Platform
+# Project Manager — FastAPI + React
 
-Modern full-stack AI-powered project management platform with FastAPI backend, React frontend, real-time features, PostgreSQL, Redis, and n8n automation.
+AI‑powered project management platform with real‑time chat, Kanban tasks, and a beautiful modern UI.
 
-## 🎯 Features
-- 🔐 **JWT Authentication** (access + refresh tokens)
-- 💬 **Real-time WebSocket** (Redis pub/sub scaling)
-- 🗄️ **PostgreSQL** + SQLAlchemy + Alembic migrations
-- ⚛️ **React Frontend** with React Router v6
-- 📊 **REST API** (Projects, Tasks, Channels, Messages, Users)
-- 🔔 **Webhook integration** (n8n automation)
-- 🧪 **Comprehensive test coverage**
-- 🐳 **Docker development environment**
-- 🎨 **Modern UI** with responsive design
+## Monorepo Layout
 
-## 🚀 Quick Start
+- `backend/` — FastAPI API (JWT auth, PostgreSQL, Redis, Alembic, WebSockets)
+- `frontend/` — React UI (styled‑components, framer‑motion, @dnd‑kit, axios)
+- `infra/` — Docker Compose, Nginx, DB bootstrap
+- `docs/` — internal documentation (API, websockets, infra, workflows)
 
-### Docker (Recommended)
-```powershell
-# Windows
-./scripts/manage.ps1 setup
-./scripts/manage.ps1 up
+## Quick Start (Local)
 
-# Linux/Mac
-make setup && make up
-```
+Backend (requires Python 3.12+, PostgreSQL, Redis):
 
-### Local Development
-
-#### Backend
-```powershell
-python -m venv PMvenv
-.\PMvenv\Scripts\Activate.ps1
-pip install -r requirements.txt
+```bash
+cd backend
+..\PMvenv\Scripts\activate
+pip install -r ..\requirements.txt
 alembic upgrade head
-uvicorn backend.app.main:app --reload
+uvicorn app.main:app --reload --port 8000
 ```
 
-#### Frontend
-```powershell
+Frontend (Node 18+):
+
+```bash
 cd frontend
 npm install
+# Configure API/WS (optional overrides): create .env.local
+# REACT_APP_API_URL=http://localhost:8000/api/v1
+# REACT_APP_WS_URL=ws://localhost:8000/api/v1/ws
 npm start
 ```
 
-**Access:**
-- Frontend: http://localhost:3000
-- API Docs: http://localhost:8000/docs
-- Health: http://localhost:8000/api/v1/health/
-- n8n: http://localhost:5678
+Open:
+- UI: http://localhost:3000
+- API: http://localhost:8000
+- Docs (OpenAPI): http://localhost:8000/docs
 
-## 📁 Project Structure
+## Quick Start (Docker Compose)
 
-```
-Project_Manager/
-├── backend/              # FastAPI application
-│   ├── app/
-│   │   ├── api/         # REST & WebSocket endpoints
-│   │   ├── core/        # Settings, security, dependencies
-│   │   ├── db/          # Models, repositories, migrations
-│   │   ├── schemas/     # Pydantic models
-│   │   └── services/    # Business logic
-│   └── tests/           # Backend tests
-├── frontend/            # React application
-│   ├── public/          # Static files
-│   └── src/
-│       ├── components/  # Reusable components
-│       ├── pages/       # Page components
-│       ├── services/    # API & WebSocket services
-│       └── styles/      # Global styles
-├── infra/              # Infrastructure configs
-├── workflows/          # n8n workflows
-├── docs/              # Documentation
-└── scripts/           # Management scripts
+All core services (DB, Redis, Backend, n8n, Frontend):
+
+```bash
+# In project root
+make setup            # creates infra/docker/.env from example if missing
+make up-full          # start db + cache + backend + frontend
+make status           # show ports and health
 ```
 
-## Documentation
+or via docker-compose directly:
 
-Comprehensive docs in `docs/`:
+```bash
+cd infra/docker
+cp .env.example .env   # adjust variables if needed
+docker-compose --profile full up -d --build
+```
 
-- **[Getting Started](docs/getting-started.md)** - Setup & environment configuration
-- **[Backend API](docs/backend-api.md)** - REST endpoints overview
-- **[WebSockets](docs/websockets.md)** - Real-time API & implementation
-- **[Webhooks & n8n](docs/workflows.md)** - Automation integration
-- **[Database](docs/implementation.md)** - Models, schemas, repositories
-- **[Migrations](docs/migrations.md)** - Alembic workflow
-- **[Docker & Infra](docs/docker.md)** - Local dev environment
-- **[Testing](docs/testing.md)** - Test suites & coverage
-- **[Project Structure](docs/structure.md)** - Folder organization
+Services:
+- Frontend: http://localhost:${FRONTEND_PORT:-3000}
+- Backend: http://localhost:${BACKEND_PORT:-8000}
+- n8n: http://localhost:${N8N_PORT:-5678}
+- PgAdmin (tools profile): http://localhost:${PGADMIN_PORT:-5050}
+- Redis Commander (tools profile): http://localhost:${REDIS_COMMANDER_PORT:-8081}
 
-## 🔧 Key Technologies
+Note: Frontend in Docker is pre‑wired with `REACT_APP_API_URL=http://localhost:8000/api/v1` and `REACT_APP_WS_URL=ws://localhost:8000/api/v1/ws`.
 
-### Backend
-- **Framework:** FastAPI
-- **ORM:** SQLAlchemy
-- **Migrations:** Alembic
-- **Validation:** Pydantic
-- **Authentication:** JWT (PyJWT)
-- **Testing:** Pytest
+## Backend (API)
 
-### Frontend
-- **Framework:** React 18
-- **Routing:** React Router v6
-- **HTTP Client:** Axios
-- **WebSocket:** Native WebSocket API
-- **Code Quality:** ESLint, Prettier
+- Tech: FastAPI, SQLAlchemy, Alembic, JWT, Redis, WebSockets
+- Entry: `backend/app/main.py`, router: `backend/app/api/`
+- Settings: `backend/app/core/settings.py` (.env in project root)
+- Migrations: `alembic` (see `docs/migrations.md`)
 
-### Infrastructure
-- **Database:** PostgreSQL
-- **Cache:** Redis
-- **Real-time:** WebSockets, Redis pub/sub
-- **Automation:** n8n
-- **Containerization:** Docker, Docker Compose
-
-## API Endpoints
-
-### Authentication
-- `POST /api/v1/auth/register` - Register user
-- `POST /api/v1/auth/login` - Login (JWT tokens)
-- `POST /api/v1/auth/refresh` - Refresh token
-- `GET /api/v1/auth/me` - Current user
-
-### Resources (CRUD)
-- `/api/v1/projects/` - Projects
-- `/api/v1/tasks/` - Tasks
-- `/api/v1/channels/` - Channels
-- `/api/v1/messages/` - Messages
-- `/api/v1/users/` - Users
-
-### Real-time
-- `WS /api/v1/ws/connect?token=JWT` - WebSocket
-
-## Database Models
-- **User** - username, email, role, full_name
-- **Project** - name, owner, status, dates
-- **Task** - title, project, assignee, status, priority
-- **Channel** - name, project, is_private
-- **Message** - content, channel, author, threading
-
-All models include `created_at` and `updated_at` timestamps.
-
-## Development Commands
-
-```powershell
-# Database
-alembic revision --autogenerate -m "description"
-alembic upgrade head
-alembic downgrade -1
-
-# Testing
+Common commands:
+```bash
+# From backend/
+uvicorn app.main:app --reload --port 8000
+alembic revision --autogenerate -m "message" && alembic upgrade head
 pytest -q
-pytest backend/tests/test_auth.py -v
-pytest --cov=backend/app
-
-# Docker
-./scripts/manage.ps1 up        # Start services
-./scripts/manage.ps1 logs      # View logs
-./scripts/manage.ps1 down      # Stop services
 ```
 
-## Environment Variables
+## Frontend (UI)
 
-Key variables in `.env`:
-```env
-DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/project_manager
-REDIS_URL=redis://localhost:6379/0
-JWT_SECRET=<64-random-chars>
-N8N_URL=http://localhost:5678
+- Tech: React 18, styled‑components 6, framer‑motion, @dnd‑kit, axios
+- Entry: `frontend/src/App.js`, theme: `frontend/src/theme/`
+- API client: `frontend/src/services/api.js`
+
+Common commands:
+```bash
+# From frontend/
+npm install
+npm start
+npm run build
+npm run lint
+npm run format
 ```
 
-See [Getting Started](docs/getting-started.md) for full configuration.
+## Infra (Docker)
 
-## Architecture
+Compose file: `infra/docker/docker-compose.yml` with services:
+- `db` (Postgres 15)
+- `cache` (Redis 7)
+- `app` (FastAPI backend, hot‑reload)
+- `frontend` (CRA dev server)
+- `n8n` (automation)
+- optional: `pgadmin`, `redis-commander`, `nginx`
 
+One‑liner to launch all core services:
+```bash
+make up-full     # or: docker-compose --profile full up -d --build -f infra/docker/docker-compose.yml
 ```
-Client → FastAPI → Service Layer → Repository → PostgreSQL
-              ↓
-         WebSocket → Redis Pub/Sub → Broadcast
-              ↓
-         Webhooks → n8n → External Services
-```
 
-## Contributing
-1. Fork the repository
-2. Create feature branch
-3. Run tests: `pytest`
-4. Submit pull request
+## Docs
+
+See `docs/` for details:
+- API: `docs/backend-api.md`
+- WebSockets: `docs/websockets.md`
+- Infra & Docker: `docs/infra.md`, `docs/docker.md`
+- Migrations: `docs/migrations.md`
+- Frontend: `docs/frontend.md`
+- Testing: `docs/testing.md`
+- Workflows (n8n): `docs/workflows.md`
+
+## Environment
+
+Root `.env.example` exists. Important keys:
+- Backend: `DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `CORS_ORIGINS`
+- Frontend: `REACT_APP_API_URL`, `REACT_APP_WS_URL`
+- Compose vars in `infra/docker/.env.example`
+
+## Makefile Shortcuts
+
+Useful targets in `Makefile`:
+- `make up` / `make up-full` / `make down`
+- `make status` / `make logs` / `make restart-app`
+- `make db-migrate` / `make db-backup` / `make db-restore`
+- `make test` / `make lint` / `make format`
+
+## Housekeeping
+
+- Kept only core folders at root: `backend/`, `frontend/`, `infra/`, `docs/`
+- Cleaned demo placeholders in frontend (pages/components) and wired real API/WebSocket
+- Compose adjusted to `./backend` and `./frontend` contexts, with correct API/WS URLs
 
 ---
 
-**Version:** 1.0  
-**Last Updated:** 2025-11-14
-
+© 2025 Project Manager. Built with FastAPI + React.

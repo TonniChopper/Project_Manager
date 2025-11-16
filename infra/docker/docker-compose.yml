@@ -184,8 +184,8 @@ services:
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     environment:
-      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
-      - REACT_APP_WS_URL=${REACT_APP_WS_URL:-ws://localhost:8000}
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000/api/v1}
+      - REACT_APP_WS_URL=${REACT_APP_WS_URL:-ws://localhost:8000/api/v1/ws}
       - NODE_ENV=${NODE_ENV:-development}
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
@@ -194,8 +194,7 @@ services:
     volumes:
       - ../../frontend:/app:cached
       - /app/node_modules
-      - /app/.next
-    command: npm run dev
+    command: npm start
     networks:
       - project_manager_network
     restart: unless-stopped
@@ -319,4 +318,3 @@ volumes:
     driver: local
   nginx_logs:
     driver: local
-
