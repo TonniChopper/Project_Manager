@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import './App.css';
+
+// Import theme
+import { ThemeProvider, GlobalStyles } from './theme';
 
 // Import pages
 import Home from './pages/Home';
@@ -17,8 +19,9 @@ function App() {
   const isAuthenticated = false;
 
   return (
-    <Router>
-      <div className="App">
+    <ThemeProvider>
+      <GlobalStyles />
+      <Router>
         <Routes>
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
@@ -76,8 +79,8 @@ function App() {
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </div>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 }
 
