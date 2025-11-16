@@ -1,17 +1,19 @@
 # Project Manager Platform
 
-Modern FastAPI backend with real-time features, PostgreSQL, Redis, and n8n automation.
+Modern full-stack AI-powered project management platform with FastAPI backend, React frontend, real-time features, PostgreSQL, Redis, and n8n automation.
 
-## Features
-- 🔐 JWT Authentication (access + refresh tokens)
-- 💬 Real-time WebSocket (Redis pub/sub scaling)
-- 🗄️ PostgreSQL + SQLAlchemy + Alembic migrations
-- 📊 REST API (Projects, Tasks, Channels, Messages, Users)
-- 🔔 Webhook integration (n8n automation)
-- 🧪 Comprehensive test coverage
-- 🐳 Docker development environment
+## 🎯 Features
+- 🔐 **JWT Authentication** (access + refresh tokens)
+- 💬 **Real-time WebSocket** (Redis pub/sub scaling)
+- 🗄️ **PostgreSQL** + SQLAlchemy + Alembic migrations
+- ⚛️ **React Frontend** with React Router v6
+- 📊 **REST API** (Projects, Tasks, Channels, Messages, Users)
+- 🔔 **Webhook integration** (n8n automation)
+- 🧪 **Comprehensive test coverage**
+- 🐳 **Docker development environment**
+- 🎨 **Modern UI** with responsive design
 
-## Quick Start
+## 🚀 Quick Start
 
 ### Docker (Recommended)
 ```powershell
@@ -24,6 +26,8 @@ make setup && make up
 ```
 
 ### Local Development
+
+#### Backend
 ```powershell
 python -m venv PMvenv
 .\PMvenv\Scripts\Activate.ps1
@@ -32,10 +36,43 @@ alembic upgrade head
 uvicorn backend.app.main:app --reload
 ```
 
+#### Frontend
+```powershell
+cd frontend
+npm install
+npm start
+```
+
 **Access:**
+- Frontend: http://localhost:3000
 - API Docs: http://localhost:8000/docs
 - Health: http://localhost:8000/api/v1/health/
 - n8n: http://localhost:5678
+
+## 📁 Project Structure
+
+```
+Project_Manager/
+├── backend/              # FastAPI application
+│   ├── app/
+│   │   ├── api/         # REST & WebSocket endpoints
+│   │   ├── core/        # Settings, security, dependencies
+│   │   ├── db/          # Models, repositories, migrations
+│   │   ├── schemas/     # Pydantic models
+│   │   └── services/    # Business logic
+│   └── tests/           # Backend tests
+├── frontend/            # React application
+│   ├── public/          # Static files
+│   └── src/
+│       ├── components/  # Reusable components
+│       ├── pages/       # Page components
+│       ├── services/    # API & WebSocket services
+│       └── styles/      # Global styles
+├── infra/              # Infrastructure configs
+├── workflows/          # n8n workflows
+├── docs/              # Documentation
+└── scripts/           # Management scripts
+```
 
 ## Documentation
 
@@ -51,14 +88,29 @@ Comprehensive docs in `docs/`:
 - **[Testing](docs/testing.md)** - Test suites & coverage
 - **[Project Structure](docs/structure.md)** - Folder organization
 
-## Key Technologies
-- **Backend:** FastAPI, SQLAlchemy, Alembic, Pydantic
+## 🔧 Key Technologies
+
+### Backend
+- **Framework:** FastAPI
+- **ORM:** SQLAlchemy
+- **Migrations:** Alembic
+- **Validation:** Pydantic
+- **Authentication:** JWT (PyJWT)
+- **Testing:** Pytest
+
+### Frontend
+- **Framework:** React 18
+- **Routing:** React Router v6
+- **HTTP Client:** Axios
+- **WebSocket:** Native WebSocket API
+- **Code Quality:** ESLint, Prettier
+
+### Infrastructure
 - **Database:** PostgreSQL
 - **Cache:** Redis
 - **Real-time:** WebSockets, Redis pub/sub
 - **Automation:** n8n
-- **Testing:** Pytest
-- **Deployment:** Docker, Docker Compose
+- **Containerization:** Docker, Docker Compose
 
 ## API Endpoints
 

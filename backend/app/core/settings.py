@@ -1,7 +1,7 @@
 from functools import lru_cache
-from typing import List
+from typing import List, Union
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import AnyUrl
+from pydantic import AnyUrl, field_validator
 
 class Settings(BaseSettings):
     APP_ENV: str = "development"
@@ -27,6 +27,20 @@ class Settings(BaseSettings):
     WS_MAX_CONNECTIONS_PER_USER: int = 5
     WS_HEARTBEAT_INTERVAL: int = 30  # seconds
     WS_MESSAGE_MAX_SIZE: int = 1024 * 1024  # 1MB
+
+    @field_validator('CORS_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(',')]
+        return v
+
+    @field_validator('FRONTEND_URL', 'N8N_URL', 'AI_SERVICE_URL', mode='before')
+    @classmethod
+    def parse_optional_url(cls, v: Union[str, None]) -> Union[str, None]:
+        if v == '' or v is None:
+            return None
+        return v
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
 

@@ -31,10 +31,16 @@ Complete guide to Project Manager Platform documentation.
 ./scripts/manage.ps1 setup && ./scripts/manage.ps1 up  # Windows
 make setup && make up                                   # Linux/Mac
 
-# Development
-alembic upgrade head      # Apply migrations
-pytest -q                 # Run tests
-uvicorn backend.app.main:app --reload  # Start server
+# Backend Development
+alembic upgrade head                        # Apply migrations
+pytest -q                                   # Run tests
+uvicorn backend.app.main:app --reload      # Start server
+
+# Frontend Development
+cd frontend && npm install                  # Install dependencies
+cd frontend && npm start                    # Start dev server
+cd frontend && npm run build               # Build for production
+cd frontend && npm run lint                # Run linter
 
 # Docker
 ./scripts/manage.ps1 logs      # View logs
@@ -43,5 +49,5 @@ uvicorn backend.app.main:app --reload  # Start server
 
 ---
 
-*Last updated: 2025-11-14*
+*Last updated: 2025-01-16*
 
