@@ -1,11 +1,13 @@
 // filepath: c:\Project_Manager\frontend\src\pages\Settings.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { GradientText, NeonButton, GlassCard } from '../theme';
+import { GradientText } from '../theme';
 import ProfileSection from '../components/settings/ProfileSection';
 import AppearanceSection from '../components/settings/AppearanceSection';
 import NotificationSection from '../components/settings/NotificationSection';
+import PasswordSection from '../components/settings/PasswordSection';
+import settingsService from '../services/settingsService';
 
 const Wrapper = styled.div`
   max-width: 900px;
@@ -70,6 +72,7 @@ const SaveFeedback = styled(motion.div)`
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('profile');
   const [showSaved, setShowSaved] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     profile: {
       name: 'John Doe',
@@ -93,16 +96,66 @@ export default function Settings() {
     },
   });
 
-  const handleSave = (section, data) => {
-    setSettings(prev => ({ ...prev, [section]: { ...prev[section], ...data } }));
-    setShowSaved(true);
-    setTimeout(() => setShowSaved(false), 3000);
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
+    setLoading(true);
+    try {
+      const [profile, appearance, notifications] = await Promise.all([
+        settingsService.getUserProfile().catch(() => settings.profile),
+        settingsService.getUserSettings().catch(() => settings.appearance),
+        settingsService.getNotificationSettings().catch(() => settings.notifications),
+      ]);
+      setSettings({ profile, appearance, notifications });
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async (section, data) => {
+    setLoading(true);
+    try {
+      if (section === 'profile') {
+        await settingsService.updateUserProfile(data);
+      } else if (section === 'appearance') {
+        await settingsService.updateUserSettings(data);
+      } else if (section === 'notifications') {
+        await settingsService.updateNotificationSettings(data);
+      }
+      setSettings(prev => ({ ...prev, [section]: { ...prev[section], ...data } }));
+      setShowSaved(true);
+      setTimeout(() => setShowSaved(false), 3000);
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      // TODO: Show error toast
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordChange = async data => {
+    setLoading(true);
+    try {
+      await settingsService.changePassword(data.current, data.new);
+      setShowSaved(true);
+      setTimeout(() => setShowSaved(false), 3000);
+    } catch (error) {
+      console.error('Failed to change password:', error);
+      // TODO: Show error toast
+    } finally {
+      setLoading(false);
+    }
   };
 
   const tabs = [
     { id: 'profile', label: 'Profile' },
     { id: 'appearance', label: 'Appearance' },
     { id: 'notifications', label: 'Notifications' },
+    { id: 'password', label: 'Password' },
   ];
 
   return (
@@ -148,6 +201,7 @@ export default function Settings() {
             onSave={data => handleSave('notifications', data)}
           />
         )}
+        {activeTab === 'password' && <PasswordSection onSave={handlePasswordChange} />}
       </motion.div>
 
       {showSaved && (

@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
+import UserMenu from './UserMenu';
 import { Badge } from '../theme';
 
 // Navigation Container
@@ -580,30 +581,7 @@ function NavigationBar({ onMenuToggle }) {
 
           <ThemeToggle />
 
-          <UserAvatar
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={createRipple}
-          >
-            JD
-            {ripples.map(ripple => (
-              <Ripple
-                key={ripple.id}
-                initial={{
-                  x: ripple.x,
-                  y: ripple.y,
-                  width: ripple.size,
-                  height: ripple.size,
-                  opacity: 1,
-                }}
-                animate={{
-                  opacity: 0,
-                  scale: 2,
-                }}
-                transition={{ duration: 0.6 }}
-              />
-            ))}
-          </UserAvatar>
+          <UserMenu />
         </RightSection>
       </NavContent>
     </NavContainer>

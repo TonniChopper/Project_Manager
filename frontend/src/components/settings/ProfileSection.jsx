@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { GlassCard, NeonButton, GlassInput } from '../../theme';
+import settingsService from '../../services/settingsService';
 
 const Card = styled(GlassCard)`
   display: flex;
@@ -97,20 +98,62 @@ const Actions = styled.div`
 
 export default function ProfileSection({ data, onSave }) {
   const [form, setForm] = useState(data);
-  const [avatarHover, setAvatarHover] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [errors, setErrors] = useState({});
 
-  const handleAvatarChange = () => {
-    // Simulate avatar upload
-    const newAvatar = `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`;
-    setForm({ ...form, avatar: newAvatar });
+  const handleAvatarChange = async () => {
+    // Create file input element
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async e => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setErrors({ avatar: 'File size must be less than 5MB' });
+        return;
+      }
+
+      setUploading(true);
+      try {
+        const response = await settingsService.uploadAvatar(file);
+        setForm({ ...form, avatar: response.avatar_url });
+        setErrors({ ...errors, avatar: null });
+      } catch (error) {
+        setErrors({ avatar: 'Failed to upload avatar' });
+        // Fallback to random avatar for demo
+        const newAvatar = `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`;
+        setForm({ ...form, avatar: newAvatar });
+      } finally {
+        setUploading(false);
+      }
+    };
+    input.click();
+  };
+
+  const validate = () => {
+    const newErrors = {};
+    if (!form.name || form.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
+    }
+    if (!form.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = 'Please enter a valid email';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = () => {
-    onSave(form);
+    if (validate()) {
+      onSave(form);
+    }
   };
 
   const handleReset = () => {
     setForm(data);
+    setErrors({});
   };
 
   return (
@@ -118,19 +161,15 @@ export default function ProfileSection({ data, onSave }) {
       <h3 style={{ margin: 0 }}>Profile Information</h3>
 
       <AvatarSection>
-        <AvatarPreview
-          onHoverStart={() => setAvatarHover(true)}
-          onHoverEnd={() => setAvatarHover(false)}
-          whileHover={{ scale: 1.05 }}
-        >
+        <AvatarPreview whileHover={{ scale: 1.05 }} style={{ opacity: uploading ? 0.6 : 1 }}>
           <img src={form.avatar} alt="Avatar" />
           <AvatarOverlay className="overlay" onClick={handleAvatarChange}>
-            Change Photo
+            {uploading ? 'Uploading...' : 'Change Photo'}
           </AvatarOverlay>
         </AvatarPreview>
 
         <AvatarActions>
-          <NeonButton $size="sm" onClick={handleAvatarChange}>
+          <NeonButton $size="sm" onClick={handleAvatarChange} disabled={uploading}>
             Upload New
           </NeonButton>
           <NeonButton $variant="secondary" $size="sm">
@@ -139,13 +178,28 @@ export default function ProfileSection({ data, onSave }) {
         </AvatarActions>
       </AvatarSection>
 
+      {errors.avatar && (
+        <ErrorMessage initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>
+          ⚠️ {errors.avatar}
+        </ErrorMessage>
+      )}
+
       <Field>
         <label>Full Name</label>
         <GlassInput
           value={form.name}
-          onChange={e => setForm({ ...form, name: e.target.value })}
+          onChange={e => {
+            setForm({ ...form, name: e.target.value });
+            if (errors.name) setErrors({ ...errors, name: null });
+          }}
           placeholder="Enter your name"
+          style={{ borderColor: errors.name ? 'var(--error)' : undefined }}
         />
+        {errors.name && (
+          <ErrorMessage initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>
+            ⚠️ {errors.name}
+          </ErrorMessage>
+        )}
       </Field>
 
       <Field>
@@ -153,9 +207,18 @@ export default function ProfileSection({ data, onSave }) {
         <GlassInput
           type="email"
           value={form.email}
-          onChange={e => setForm({ ...form, email: e.target.value })}
+          onChange={e => {
+            setForm({ ...form, email: e.target.value });
+            if (errors.email) setErrors({ ...errors, email: null });
+          }}
           placeholder="your@email.com"
+          style={{ borderColor: errors.email ? 'var(--error)' : undefined }}
         />
+        {errors.email && (
+          <ErrorMessage initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}>
+            ⚠️ {errors.email}
+          </ErrorMessage>
+        )}
       </Field>
 
       <Field>
@@ -185,3 +248,12 @@ export default function ProfileSection({ data, onSave }) {
     </Card>
   );
 }
+
+const ErrorMessage = styled(motion.div)`
+  color: ${({ theme }) => theme.colors.error};
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  margin-top: ${({ theme }) => theme.spacing.xs};
+  display: flex;
+  align-items: center;
+  gap: ${({ theme }) => theme.spacing.xs};
+`;
