@@ -3,22 +3,24 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.0",
-    "react-scripts": "5.0.1",
     "axios": "^1.6.2",
     "framer-motion": "^10.16.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "react-router-dom": "^6.20.0",
+    "react-scripts": "5.0.1",
+    "remark-gfm": "^4.0.0",
     "styled-components": "^6.1.1",
     "web-vitals": "^3.5.0"
   },
   "scripts": {
-    "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
     "eject": "react-scripts eject",
+    "format": "prettier --write 'src/**/*.{js,jsx,json,css,md}'",
     "lint": "eslint src/**/*.{js,jsx}",
-    "format": "prettier --write 'src/**/*.{js,jsx,json,css,md}'"
+    "start": "react-scripts start",
+    "test": "react-scripts test"
   },
   "eslintConfig": {
     "extends": [
@@ -27,15 +29,15 @@
     ]
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
     ]
   },
   "devDependencies": {
@@ -45,4 +47,3 @@
     "prettier": "^3.1.0"
   }
 }
-
