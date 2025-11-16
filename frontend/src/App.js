@@ -12,6 +12,7 @@ import Tasks from './pages/Tasks';
 import Chat from './pages/Chat';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Settings from './pages/Settings';
 
 // Import components
 import AppLayout from './components/AppLayout';
@@ -83,6 +84,18 @@ function App() {
               isAuthenticated ? (
                 <AppLayout>
                   <Chat />
+                </AppLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              isAuthenticated ? (
+                <AppLayout>
+                  <Settings />
                 </AppLayout>
               ) : (
                 <Navigate to="/login" replace />
