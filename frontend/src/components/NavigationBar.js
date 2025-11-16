@@ -286,6 +286,23 @@ const NotificationBadge = styled(motion.div)`
   box-shadow: ${({ theme }) => theme.shadows.neonPink};
 `;
 
+const NotificationPopover = styled(motion.div)`
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 320px;
+  max-height: 60vh;
+  overflow: auto;
+  background: ${({ theme }) => theme.background.glass};
+  backdrop-filter: ${({ theme }) => theme.blur.lg};
+  -webkit-backdrop-filter: ${({ theme }) => theme.blur.lg};
+  border: 1px solid ${({ theme }) => theme.border.glass};
+  border-radius: ${({ theme }) => theme.radius.lg};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
+  padding: ${({ theme }) => theme.spacing.md};
+  z-index: ${({ theme }) => theme.zIndices.popover};
+`;
+
 const UserAvatar = styled(motion.button)`
   width: 40px;
   height: 40px;
@@ -331,10 +348,11 @@ const Ripple = styled(motion.span)`
   pointer-events: none;
 `;
 
-function NavigationBar() {
+function NavigationBar({ onMenuToggle }) {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [ripples, setRipples] = useState([]);
+  const [notifOpen, setNotifOpen] = useState(false);
 
   const isActive = path => location.pathname === path;
 
@@ -401,6 +419,22 @@ function NavigationBar() {
               )}
             </svg>
           </MenuToggle>
+
+          {/* Mobile-only menu trigger to toggle sidebar if provided */}
+          {onMenuToggle && (
+            <MenuToggle onClick={onMenuToggle} whileTap={{ scale: 0.95 }}>
+              <svg
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M3 6h18M3 12h18M3 18h18" />
+              </svg>
+            </MenuToggle>
+          )}
         </LogoSection>
 
         {/* Main Menu */}
@@ -437,37 +471,111 @@ function NavigationBar() {
             <kbd>⌘K</kbd>
           </SearchButton>
 
-          <NotificationButton
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={createRipple}
-          >
-            <BellIcon />
-            <NotificationBadge
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 500 }}
+          <div style={{ position: 'relative' }}>
+            <NotificationButton
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={e => {
+                createRipple(e);
+                setNotifOpen(prev => !prev);
+              }}
+              aria-haspopup="dialog"
+              aria-expanded={notifOpen}
             >
-              3
-            </NotificationBadge>
-            {ripples.map(ripple => (
-              <Ripple
-                key={ripple.id}
-                initial={{
-                  x: ripple.x,
-                  y: ripple.y,
-                  width: ripple.size,
-                  height: ripple.size,
-                  opacity: 1,
-                }}
-                animate={{
-                  opacity: 0,
-                  scale: 2,
-                }}
-                transition={{ duration: 0.6 }}
-              />
-            ))}
-          </NotificationButton>
+              <BellIcon />
+              <NotificationBadge
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 500 }}
+              >
+                3
+              </NotificationBadge>
+              {ripples.map(ripple => (
+                <Ripple
+                  key={ripple.id}
+                  initial={{
+                    x: ripple.x,
+                    y: ripple.y,
+                    width: ripple.size,
+                    height: ripple.size,
+                    opacity: 1,
+                  }}
+                  animate={{ opacity: 0, scale: 2 }}
+                  transition={{ duration: 0.6 }}
+                />
+              ))}
+            </NotificationButton>
+
+            <AnimatePresence>
+              {notifOpen && (
+                <NotificationPopover
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <strong>Notifications</strong>
+                    <button
+                      onClick={() => setNotifOpen(false)}
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'inherit',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div
+                    style={{
+                      marginTop: '0.5rem',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span>New message in #general</span>
+                      <Badge $variant="info">now</Badge>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span>Task "Design header" completed</span>
+                      <Badge $variant="success">2m</Badge>
+                    </div>
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <span>Project "Mobile App" moved to Planning</span>
+                      <Badge $variant="warning">1h</Badge>
+                    </div>
+                  </div>
+                </NotificationPopover>
+              )}
+            </AnimatePresence>
+          </div>
 
           <ThemeToggle />
 

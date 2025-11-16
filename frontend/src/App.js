@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-// Import theme
-import { ThemeProvider, GlobalStyles } from './theme';
+// Import theme (use direct files to avoid re-export issues)
+import ThemeProvider from './theme/ThemeProvider';
+import GlobalStyles from './theme/GlobalStyles';
 
 // Import pages
 import Home from './pages/Home';
@@ -10,6 +11,7 @@ import Projects from './pages/Projects';
 import Tasks from './pages/Tasks';
 import Chat from './pages/Chat';
 import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 
 // Import components
 import AppLayout from './components/AppLayout';
@@ -29,6 +31,18 @@ function App() {
           {/* Protected routes */}
           <Route
             path="/"
+            element={
+              isAuthenticated ? (
+                <AppLayout>
+                  <Dashboard />
+                </AppLayout>
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/home"
             element={
               isAuthenticated ? (
                 <AppLayout>

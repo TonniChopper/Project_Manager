@@ -6,6 +6,11 @@
   "tabWidth": 2,
   "useTabs": false,
   "arrowParens": "avoid",
-  "endOfLine": "auto"
+  "endOfLine": "lf",
+  "overrides": [
+    {
+      "files": "*.{js,jsx}",
+      "options": { "endOfLine": "lf" }
+    }
+  ]
 }
-
