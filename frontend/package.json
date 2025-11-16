@@ -1,48 +1,48 @@
 {
-}
-  }
-    "prettier": "^3.1.0"
-    "eslint-plugin-prettier": "^5.0.1",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint": "^8.54.0",
-  "devDependencies": {
-  },
-    ]
-      "last 1 safari version"
-      "last 1 firefox version",
-      "last 1 chrome version",
-    "development": [
-    ],
-      "not op_mini all"
-      "not dead",
-      ">0.2%",
-    "production": [
-  "browserslist": {
-  },
-    ]
-      "react-app/jest"
-      "react-app",
-    "extends": [
-  "eslintConfig": {
-  },
-    "format": "prettier --write 'src/**/*.{js,jsx,json,css,md}'"
-    "lint": "eslint src/**/*.{js,jsx}",
-    "eject": "react-scripts eject",
-    "test": "react-scripts test",
-    "build": "react-scripts build",
-    "start": "react-scripts start",
-  "scripts": {
-  },
-    "web-vitals": "^3.5.0",
-    "styled-components": "^6.1.1",
-    "framer-motion": "^10.16.5"
-    "axios": "^1.6.2",
-    "react-scripts": "5.0.1",
-    "react-router-dom": "^6.20.0",
-    "react-dom": "^18.2.0",
-    "react": "^18.2.0",
-  "dependencies": {
-  "private": true,
-  "version": "0.1.0",
   "name": "project-manager-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "react-scripts": "5.0.1",
+    "axios": "^1.6.2",
+    "framer-motion": "^10.16.5",
+    "styled-components": "^6.1.1",
+    "web-vitals": "^3.5.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint src/**/*.{js,jsx}",
+    "format": "prettier --write 'src/**/*.{js,jsx,json,css,md}'"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0"
+  }
+}
 
