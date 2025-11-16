@@ -45,3 +45,16 @@ class ProjectPublic(ProjectBase):
 class ProjectDetail(ProjectPublic):
     pass
 
+
+# ---- Added metrics models ----
+class ProjectMetrics(BaseModel):
+    total_tasks: int
+    completed_tasks: int
+    progress_percent: float
+    overdue_tasks: int
+    velocity_7d: int  # число задач завершенных за последние 7 дней
+
+
+class ProjectWithMetrics(ProjectPublic):
+    metrics: ProjectMetrics
+    model_config = ConfigDict(from_attributes=True)

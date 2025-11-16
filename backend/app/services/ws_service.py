@@ -277,26 +277,20 @@ async def process_client_message(
 
     if msg_type == "join_room":
         if not room:
-            await manager.send_personal_message({
-                "type": "error",
-                "data": {"error": "Room ID required"}
-            }, websocket)
+            await manager.send_personal_message({"type": "error", "data": {"error": "Room ID required"}}, websocket)
             return
-
-        # TODO: Check user access to room (project, channel, task permissions)
+        # Basic access control stub: allow all for now; could parse room type
+        # room format examples: channel:123 project:45 task:67
+        if ":" not in room:
+            await manager.send_personal_message({"type": "error", "data": {"error": "Invalid room format"}}, websocket)
+            return
+        prefix, ident = room.split(":", 1)
+        if prefix not in {"channel", "project", "task"}:
+            await manager.send_personal_message({"type": "error", "data": {"error": "Unsupported room type"}}, websocket)
+            return
         await manager.join_room(websocket, room)
-        await manager.send_personal_message({
-            "type": "joined_room",
-            "room": room,
-            "data": {"message": f"Joined room {room}"}
-        }, websocket)
-
-        # Notify room members
-        await manager.broadcast_to_room(room, {
-            "type": "user_joined",
-            "data": {"username": username, "user_id": user_id}
-        }, sender_username=username)
-
+        await manager.send_personal_message({"type": "joined_room", "room": room, "data": {"message": f"Joined room {room}"}}, websocket)
+        await manager.broadcast_to_room(room, {"type": "user_joined", "data": {"username": username, "user_id": user_id}}, sender_username=username)
     elif msg_type == "leave_room":
         if not room:
             await manager.send_personal_message({
@@ -320,25 +314,13 @@ async def process_client_message(
 
     elif msg_type == "send_message":
         if not room:
-            await manager.send_personal_message({
-                "type": "error",
-                "data": {"error": "Room ID required"}
-            }, websocket)
+            await manager.send_personal_message({"type": "error", "data": {"error": "Room ID required"}}, websocket)
             return
-
-        # Broadcast message to room
-        await manager.broadcast_to_room(room, {
-            "type": "message",
-            "data": {
-                "content": data.get("content", ""),
-                "username": username,
-                "user_id": user_id,
-                **data
-            }
-        }, sender_username=username)
-
-        # TODO: Persist message to DB if it's a channel message
-
+        # Persist stub if channel
+        if room.startswith("channel:"):
+            # TODO later: real DB persistence
+            pass
+        await manager.broadcast_to_room(room, {"type": "message", "data": {"content": data.get("content", ""), "username": username, "user_id": user_id, **data}}, sender_username=username)
     elif msg_type == "ping":
         await manager.send_personal_message({
             "type": "pong",
@@ -380,4 +362,3 @@ async def notify_user(user_id: int, notification_type: str, data: dict):
     })
 
     logger.info(f"Notification sent to user {user_id}: {notification_type}")
-

@@ -12,7 +12,6 @@ import {
   SkeletonLoader,
 } from '../theme';
 import projectService from '../services/projectService';
-import taskService from '../services/taskService';
 
 const DashboardWrapper = styled.div`
   display: flex;
@@ -126,17 +125,18 @@ function Dashboard() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const [projectsData] = await Promise.all([projectService.getProjects({ limit: 6 })]);
-
-      // Transform backend data to match UI expectations
+      const [projectsData] = await Promise.all([projectService.getProjects({ limit: 6, include: 'metrics' })]);
       const transformedProjects = projectsData.map(p => ({
         id: p.id,
         name: p.name,
         status: p.status || 'active',
-        progress: calculateProgress(p),
+        progress: p.metrics ? p.metrics.progress_percent : 0,
+        totalTasks: p.metrics ? p.metrics.total_tasks : 0,
+        completedTasks: p.metrics ? p.metrics.completed_tasks : 0,
+        velocity7d: p.metrics ? p.metrics.velocity_7d : 0,
+        overdue: p.metrics ? p.metrics.overdue_tasks : 0,
         color: getStatusColor(p.status),
       }));
-
       setProjects(transformedProjects);
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
@@ -147,8 +147,7 @@ function Dashboard() {
   };
 
   const calculateProgress = project => {
-    // Calculate based on tasks if available
-    return Math.floor(Math.random() * 100); // TODO: get real progress from backend
+    return project.progress || 0; // теперь берем из backend
   };
 
   const getStatusColor = status => {
@@ -160,19 +159,6 @@ function Dashboard() {
       on_hold: 'warning',
     };
     return colors[status] || 'primary';
-  };
-
-  const handleCreateProject = async () => {
-    try {
-      const newProject = await projectService.createProject({
-        name: 'New Project',
-        description: 'Project description',
-        status: 'planning',
-      });
-      setProjects(prev => [newProject, ...prev]);
-    } catch (err) {
-      console.error('Failed to create project:', err);
-    }
   };
 
   if (loading) {
@@ -239,25 +225,19 @@ function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              whileHover={{ y: -4 }}
             >
               <div className="header">
-                <span className="title">{p.name}</span>
+                <div className="title">{p.name}</div>
                 <Badge $variant={p.color}>{p.status}</Badge>
               </div>
-              <ProgressBar>
-                <motion.div
-                  className="fill"
-                  initial={{ width: 0 }}
-                  animate={{ width: `${p.progress}%` }}
-                  transition={{ duration: 0.8 }}
-                />
-              </ProgressBar>
               <div className="meta">
-                <span>{p.progress}%</span>
-                <span>•</span>
-                <span>12 tasks</span>
+                <span>{p.completedTasks}/{p.totalTasks} tasks</span>
+                <span>Velocity(7d): {p.velocity7d}</span>
+                {p.overdue > 0 && <span style={{ color: 'var(--error)' }}>Overdue: {p.overdue}</span>}
               </div>
+              <ProgressBar>
+                <div className="fill" style={{ width: `${calculateProgress(p)}%` }} />
+              </ProgressBar>
             </ProjectCard>
           </div>
         ))}

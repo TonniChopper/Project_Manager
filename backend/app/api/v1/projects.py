@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks, Query
 from sqlalchemy.orm import Session
-from typing import List
+from datetime import datetime, timedelta, timezone
 
 from ...core.dependencies import get_db
 from ...core.security import get_current_user
-from ...schemas.project import ProjectCreate, ProjectUpdate, ProjectPublic, ProjectDetail
-from ...db.models import Project
+from ...schemas.project import ProjectCreate, ProjectUpdate, ProjectPublic, ProjectDetail, ProjectMetrics, ProjectWithMetrics
+from ...db.models import Project, Task
 from ...services.webhooks import send_webhook_sync, WebhookEventType
 
 router = APIRouter()
@@ -59,11 +59,24 @@ def create_project(payload: ProjectCreate, db: Session = Depends(get_db), curren
     return project
 
 
-@router.get("/", response_model=List[ProjectPublic], summary="List projects")
-def list_projects(db: Session = Depends(get_db), current_user: dict | None = Depends(get_current_user)):
-    # Show all non-archived projects; authenticated user will effectively see all but membership filtering is simplified
+@router.get("/", response_model=list[ProjectPublic], summary="List projects")
+def list_projects(include: str | None = Query(None), db: Session = Depends(get_db), current_user: dict | None = Depends(get_current_user)):
     stmt = db.query(Project).filter(Project.is_archived == False)
     projects = stmt.limit(100).all()
+    if include == "metrics":
+        # обогащаем метриками
+        enriched: list[ProjectPublic] = []
+        for p in projects:
+            total = db.query(Task).filter(Task.project_id == p.id).count()
+            completed = db.query(Task).filter(Task.project_id == p.id, Task.status == "done").count()
+            overdue = db.query(Task).filter(Task.project_id == p.id, Task.due_date.isnot(None), Task.due_date < datetime.now(timezone.utc), Task.status != "done").count()
+            last_week = datetime.now(timezone.utc) - timedelta(days=7)
+            velocity_7d = db.query(Task).filter(Task.project_id == p.id, Task.status == "done", Task.updated_at >= last_week).count()
+            progress = 0.0 if total == 0 else round((completed / total) * 100, 2)
+            metrics = ProjectMetrics(total_tasks=total, completed_tasks=completed, progress_percent=progress, overdue_tasks=overdue, velocity_7d=velocity_7d)
+            # Pydantic из attributes, но тут комбинируем вручную
+            enriched.append(ProjectWithMetrics(**ProjectPublic.model_validate(p).model_dump(), metrics=metrics))
+        return enriched  # type: ignore
     return projects
 
 
@@ -129,3 +142,17 @@ def delete_project(
     db.add(project)
     db.commit()
     return None
+
+
+@router.get("/{project_id}/metrics", response_model=ProjectMetrics, summary="Get project metrics")
+def get_project_metrics(project_id: int, db: Session = Depends(get_db), current_user: dict | None = Depends(get_current_user)):
+    project = db.get(Project, project_id)
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    total = db.query(Task).filter(Task.project_id == project_id).count()
+    completed = db.query(Task).filter(Task.project_id == project_id, Task.status == "done").count()
+    overdue = db.query(Task).filter(Task.project_id == project_id, Task.due_date.isnot(None), Task.due_date < datetime.now(timezone.utc), Task.status != "done").count()
+    last_week = datetime.now(timezone.utc) - timedelta(days=7)
+    velocity_7d = db.query(Task).filter(Task.project_id == project_id, Task.status == "done", Task.updated_at >= last_week).count()
+    progress = 0.0 if total == 0 else round((completed / total) * 100, 2)
+    return ProjectMetrics(total_tasks=total, completed_tasks=completed, progress_percent=progress, overdue_tasks=overdue, velocity_7d=velocity_7d)

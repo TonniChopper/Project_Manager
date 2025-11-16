@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
+import { authService } from '../services/authService';
 
 const MenuButton = styled(motion.button)`
   width: 40px;
@@ -161,9 +162,9 @@ export default function UserMenu({
   ];
 
   const handleLogout = () => {
-    // TODO: Implement logout logic
-    console.log('Logging out...');
+    authService.logout();
     setIsOpen(false);
+    window.location.href = '/login';
   };
 
   return (
